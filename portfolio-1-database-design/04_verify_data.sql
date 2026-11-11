@@ -1,7 +1,5 @@
--- =====================================================================
--- MIT 8103 Portfolio 1: Quick checks that the data loaded correctly
--- Run:  docker exec -i marriott_postgres psql -U mit8103 -d marriott_crs -f /scripts/p1/04_verify_data.sql
--- =====================================================================
+-- Portfolio 1: check the data loaded properly
+-- docker exec marriott_postgres psql -U mit8103 -d marriott_crs -f /scripts/p1/04_verify_data.sql
 SET search_path TO crs;
 
 \echo '=== Row count per table ==='

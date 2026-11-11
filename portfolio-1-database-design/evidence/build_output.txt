@@ -1,4 +1,4 @@
-psql:/scripts/p1/01_schema.sql:11: NOTICE:  drop cascades to 16 other objects
+psql:/scripts/p1/01_schema.sql:4: NOTICE:  drop cascades to 17 other objects
 DETAIL:  drop cascades to extension btree_gist
 drop cascades to table crs.country
 drop cascades to table crs.city
@@ -12,6 +12,7 @@ drop cascades to table crs.guest
 drop cascades to table crs.bonvoy_account
 drop cascades to table crs.reservation
 drop cascades to table crs.stay
+drop cascades to function crs.check_stay_room_hotel()
 drop cascades to table crs.payment
 drop cascades to table crs.points_transaction
 drop cascades to table crs.review

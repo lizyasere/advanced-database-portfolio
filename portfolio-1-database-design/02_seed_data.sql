@@ -1,11 +1,6 @@
--- =====================================================================
--- MIT 8103 Portfolio 1: Sample data
--- Hotel names and addresses are real Marriott properties. MARSHA codes
--- LOSFP and LOSSI are the real codes; the other codes, and all guests,
--- bookings, payments and prices, are made up for this exercise.
---
--- Run:  docker exec -i marriott_postgres psql -U mit8103 -d marriott_crs -f /scripts/p1/02_seed_data.sql
--- =====================================================================
+-- Portfolio 1: sample data
+-- real hotel names/addresses, everything else made up (LOSFP and LOSSI are real codes)
+-- docker exec marriott_postgres psql -U mit8103 -d marriott_crs -f /scripts/p1/02_seed_data.sql
 SET search_path TO crs;
 
 INSERT INTO country (country_code, country_name, region) VALUES
@@ -45,7 +40,7 @@ FROM (VALUES
 JOIN brand b ON b.brand_name = v.brand
 JOIN city  c ON c.city_name  = v.city;
 
--- Three room types per hotel. Prices are per night in the hotel's own currency.
+-- 3 room types per hotel, local currency
 INSERT INTO room_type (hotel_id, type_code, type_name, bed_type, max_occupancy, base_rate)
 SELECT h.hotel_id, t.code, t.name, t.bed, t.occ, round(p.deluxe * t.factor, 2)
 FROM hotel h
@@ -57,8 +52,7 @@ CROSS JOIN (VALUES ('DLXK', 'Deluxe King',     'King', 2, 1.00),
                    ('EXSU', 'Executive Suite', 'King', 4, 1.85))
      AS t(code, name, bed, occ, factor);
 
--- 20 rooms per hotel: floors 1 to 4, rooms x01 to x05.
--- x01 and x02 are Deluxe King, x03 and x04 are Deluxe Twin, x05 is the suite.
+-- 20 rooms per hotel (floors 1-4). x01-x02 king, x03-x04 twin, x05 suite
 INSERT INTO room (hotel_id, room_type_id, room_number, floor_no)
 SELECT h.hotel_id, rt.room_type_id, (f * 100 + n)::text, f
 FROM hotel h
@@ -117,8 +111,7 @@ FROM (VALUES
 ) AS v(email, num, tier, pts, enrolled)
 JOIN guest g ON g.email = v.email;
 
--- Reservations. The nightly rate is worked out from the room type's base rate
--- and the rate plan discount, which is how the price is fixed at booking time.
+-- nightly rate = base rate minus rate plan discount
 INSERT INTO reservation (confirmation_no, guest_id, hotel_id, room_type_id, rate_plan_id,
                          check_in_date, check_out_date, num_guests, nightly_rate,
                          booking_channel, res_status, booked_at)
@@ -147,7 +140,7 @@ JOIN hotel h      ON h.marsha_code = v.code
 JOIN room_type rt ON rt.hotel_id = h.hotel_id AND rt.type_code = v.type_code
 JOIN rate_plan rp ON rp.rate_code = v.rate_code;
 
--- Stays for guests who have checked in (or already checked out)
+-- stays (checked in / checked out bookings only)
 INSERT INTO stay (reservation_id, room_id, checked_in_by, stay_period, actual_check_in, actual_check_out)
 SELECT r.reservation_id, rm.room_id, s.staff_id,
        daterange(r.check_in_date, r.check_out_date),
@@ -164,7 +157,7 @@ JOIN reservation r ON r.confirmation_no = v.conf
 JOIN room rm       ON rm.hotel_id = r.hotel_id AND rm.room_number = v.room_no
 LEFT JOIN staff s  ON s.hotel_id = r.hotel_id AND s.first_name = v.staff_name;
 
--- Payments: total = nightly rate x number of nights, in the hotel's currency
+-- payments: rate x nights
 INSERT INTO payment (reservation_id, amount, currency_code, pay_method, card_last4, pay_status, paid_at)
 SELECT r.reservation_id,
        r.nightly_rate * (r.check_out_date - r.check_in_date),
@@ -181,7 +174,7 @@ FROM (VALUES
 JOIN reservation r ON r.confirmation_no = v.conf
 JOIN hotel h       ON h.hotel_id = r.hotel_id;
 
--- Bonvoy points activity
+-- bonvoy points
 INSERT INTO points_transaction (account_id, reservation_id, txn_type, points, created_at)
 SELECT a.account_id, r.reservation_id, v.txn_type, v.pts, v.at::timestamptz
 FROM (VALUES

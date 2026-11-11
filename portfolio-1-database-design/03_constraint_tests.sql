@@ -1,11 +1,5 @@
--- =====================================================================
--- MIT 8103 Portfolio 1: Constraint tests
--- Each statement below breaks a business rule on purpose. Every one of
--- them should be REJECTED by the database with an error. The output is
--- saved in evidence/constraint_test_output.txt
---
--- Run:  docker exec -i marriott_postgres psql -U mit8103 -d marriott_crs -f /scripts/p1/03_constraint_tests.sql
--- =====================================================================
+-- Portfolio 1: constraint tests. Tests 1-10 should all fail, control test should pass.
+-- docker exec marriott_postgres psql -U mit8103 -d marriott_crs -f /scripts/p1/03_constraint_tests.sql
 SET search_path TO crs;
 \echo
 \echo '=== Test 1: check-out date before check-in date (CHECK constraint) ==='
@@ -15,9 +9,7 @@ VALUES ('TEST0001', 1, 1, 1, 1, '2026-12-10', '2026-12-08', 2, 310000, 'Web');
 
 \echo
 \echo '=== Test 2: two guests given the same physical room on overlapping nights (EXCLUDE constraint) ==='
--- Room 102 at Accra Marriott is already occupied 8 to 12 Nov 2026 (reservation 84215902).
--- A second Accra booking for 10 to 11 Nov is created, then the front desk tries to
--- put that guest in the same room 102. Everything is rolled back afterwards.
+-- Accra room 102 is taken 8-12 Nov (84215902). New booking for 10-11 Nov tries the same room.
 BEGIN;
 INSERT INTO reservation (confirmation_no, guest_id, hotel_id, room_type_id, rate_plan_id,
                          check_in_date, check_out_date, num_guests, nightly_rate, booking_channel)
@@ -95,5 +87,5 @@ SELECT (SELECT reservation_id FROM reservation WHERE confirmation_no = 'TEST0011
        (SELECT room_id FROM room rm JOIN hotel h USING (hotel_id)
          WHERE h.marsha_code = 'ACCMC' AND rm.room_number = '101'),
        daterange('2026-11-10', '2026-11-11');
-ROLLBACK;   -- undo it so the sample data stays clean
+ROLLBACK;
 \echo '(control insert succeeded and was rolled back)'

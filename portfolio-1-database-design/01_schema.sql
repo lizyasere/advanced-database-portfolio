@@ -1,27 +1,17 @@
--- =====================================================================
--- MIT 8103 Portfolio 1: Database Design and Modelling
--- Case study: Marriott International central reservation and Bonvoy
--- loyalty database (simplified model, simulated data)
--- Database: PostgreSQL 16
---
--- Run:  docker exec -i marriott_postgres psql -U mit8103 -d marriott_crs -f /scripts/p1/01_schema.sql
--- =====================================================================
+-- Portfolio 1: Marriott CRS schema (PostgreSQL 16)
+-- docker exec marriott_postgres psql -U mit8103 -d marriott_crs -f /scripts/p1/01_schema.sql
 
--- Start clean so the script can be run again at any time
 DROP SCHEMA IF EXISTS crs CASCADE;
 CREATE SCHEMA crs;
 SET search_path TO crs;
 
--- btree_gist lets me combine an equality check (same room) with a range
--- overlap check (same dates) in one exclusion constraint on the stay table.
+-- needed for the overlap rule on stay
 CREATE EXTENSION IF NOT EXISTS btree_gist;
 
--- ---------------------------------------------------------------------
--- 1. Reference data: where hotels are and which brand they belong to
--- ---------------------------------------------------------------------
+-- locations and brands
 
 CREATE TABLE country (
-    country_code   CHAR(2)      PRIMARY KEY,               -- ISO 3166 code, e.g. NG
+    country_code   CHAR(2)      PRIMARY KEY,
     country_name   VARCHAR(80)  NOT NULL UNIQUE,
     region         VARCHAR(40)  NOT NULL
         CHECK (region IN ('Africa', 'Middle East', 'Europe', 'US & Canada',
@@ -42,20 +32,18 @@ CREATE TABLE brand (
         CHECK (tier IN ('Luxury', 'Premium', 'Select', 'Midscale', 'Extended Stay'))
 );
 
--- ---------------------------------------------------------------------
--- 2. Hotels, staff and physical inventory
--- ---------------------------------------------------------------------
+-- hotels, staff and rooms
 
 CREATE TABLE hotel (
     hotel_id       SERIAL       PRIMARY KEY,
-    marsha_code    CHAR(5)      NOT NULL UNIQUE            -- Marriott's 5 letter property code
+    marsha_code    CHAR(5)      NOT NULL UNIQUE
         CHECK (marsha_code ~ '^[A-Z]{5}$'),
     hotel_name     VARCHAR(120) NOT NULL,
     brand_id       INT          NOT NULL REFERENCES brand(brand_id),
     city_id        INT          NOT NULL REFERENCES city(city_id),
     address        VARCHAR(200) NOT NULL,
     star_rating    SMALLINT     NOT NULL CHECK (star_rating BETWEEN 1 AND 5),
-    currency_code  CHAR(3)      NOT NULL,                  -- local selling currency, e.g. NGN
+    currency_code  CHAR(3)      NOT NULL,
     opened_on      DATE
 );
 
@@ -73,13 +61,13 @@ CREATE TABLE staff (
 CREATE TABLE room_type (
     room_type_id   SERIAL       PRIMARY KEY,
     hotel_id       INT          NOT NULL REFERENCES hotel(hotel_id),
-    type_code      VARCHAR(10)  NOT NULL,                  -- e.g. DLXK = Deluxe King
+    type_code      VARCHAR(10)  NOT NULL,   -- e.g. DLXK
     type_name      VARCHAR(60)  NOT NULL,
     bed_type       VARCHAR(20)  NOT NULL CHECK (bed_type IN ('King', 'Twin', 'Queen', 'Double')),
     max_occupancy  SMALLINT     NOT NULL CHECK (max_occupancy BETWEEN 1 AND 8),
-    base_rate      NUMERIC(12,2) NOT NULL CHECK (base_rate > 0),  -- per night, hotel currency
+    base_rate      NUMERIC(12,2) NOT NULL CHECK (base_rate > 0),   -- per night
     UNIQUE (hotel_id, type_code),
-    UNIQUE (room_type_id, hotel_id)          -- needed for the composite foreign key on room
+    UNIQUE (room_type_id, hotel_id)
 );
 
 CREATE TABLE room (
@@ -91,14 +79,11 @@ CREATE TABLE room (
     room_status    VARCHAR(15)  NOT NULL DEFAULT 'Available'
         CHECK (room_status IN ('Available', 'Out of Order', 'Cleaning')),
     UNIQUE (hotel_id, room_number),
-    -- A room can only use a room type that belongs to the SAME hotel.
-    -- A plain FK on room_type_id would allow a Lagos room to point at a Dubai room type.
+    -- room type must be from the same hotel
     FOREIGN KEY (room_type_id, hotel_id) REFERENCES room_type(room_type_id, hotel_id)
 );
 
--- ---------------------------------------------------------------------
--- 3. Pricing
--- ---------------------------------------------------------------------
+-- rates
 
 CREATE TABLE rate_plan (
     rate_plan_id        SERIAL      PRIMARY KEY,
@@ -109,9 +94,7 @@ CREATE TABLE rate_plan (
     members_only        BOOLEAN     NOT NULL DEFAULT FALSE
 );
 
--- ---------------------------------------------------------------------
--- 4. Guests and Marriott Bonvoy loyalty
--- ---------------------------------------------------------------------
+-- guests and bonvoy
 
 CREATE TABLE guest (
     guest_id       SERIAL       PRIMARY KEY,
@@ -123,13 +106,12 @@ CREATE TABLE guest (
     nationality    CHAR(2)      REFERENCES country(country_code),
     date_of_birth  DATE         CHECK (date_of_birth < CURRENT_DATE),
     created_at     TIMESTAMPTZ  NOT NULL DEFAULT now()
-    -- Passport numbers are deliberately NOT stored. The Starwood breach exposed
-    -- passport data for millions of guests; data that is not kept cannot be stolen.
+    -- no passport number on purpose (see README, Starwood breach)
 );
 
 CREATE TABLE bonvoy_account (
     account_id     SERIAL       PRIMARY KEY,
-    guest_id       INT          NOT NULL UNIQUE REFERENCES guest(guest_id),  -- one account per guest
+    guest_id       INT          NOT NULL UNIQUE REFERENCES guest(guest_id),
     member_number  CHAR(9)      NOT NULL UNIQUE CHECK (member_number ~ '^[0-9]{9}$'),
     elite_tier     VARCHAR(20)  NOT NULL DEFAULT 'Member'
         CHECK (elite_tier IN ('Member', 'Silver Elite', 'Gold Elite', 'Platinum Elite',
@@ -138,9 +120,7 @@ CREATE TABLE bonvoy_account (
     enrolled_on    DATE         NOT NULL DEFAULT CURRENT_DATE
 );
 
--- ---------------------------------------------------------------------
--- 5. Reservations, stays, payments, points and reviews
--- ---------------------------------------------------------------------
+-- bookings, stays, payments, points, reviews
 
 CREATE TABLE reservation (
     reservation_id   SERIAL       PRIMARY KEY,
@@ -152,7 +132,7 @@ CREATE TABLE reservation (
     check_in_date    DATE         NOT NULL,
     check_out_date   DATE         NOT NULL,
     num_guests       SMALLINT     NOT NULL CHECK (num_guests BETWEEN 1 AND 8),
-    nightly_rate     NUMERIC(12,2) NOT NULL CHECK (nightly_rate >= 0),  -- price agreed at booking time
+    nightly_rate     NUMERIC(12,2) NOT NULL CHECK (nightly_rate >= 0),   -- price at time of booking
     booking_channel  VARCHAR(15)  NOT NULL
         CHECK (booking_channel IN ('Web', 'Mobile App', 'Call Centre', 'Travel Agent', 'Walk-in')),
     res_status       VARCHAR(12)  NOT NULL DEFAULT 'Confirmed'
@@ -162,7 +142,7 @@ CREATE TABLE reservation (
     FOREIGN KEY (room_type_id, hotel_id) REFERENCES room_type(room_type_id, hotel_id)
 );
 
--- A stay is created at check-in, when a physical room is handed to the guest.
+-- created at check-in when the guest gets an actual room
 CREATE TABLE stay (
     stay_id          SERIAL       PRIMARY KEY,
     reservation_id   INT          NOT NULL UNIQUE REFERENCES reservation(reservation_id),
@@ -172,12 +152,11 @@ CREATE TABLE stay (
     actual_check_in  TIMESTAMPTZ  NOT NULL DEFAULT now(),
     actual_check_out TIMESTAMPTZ,
     CHECK (actual_check_out IS NULL OR actual_check_out > actual_check_in),
-    -- The same physical room can never be occupied by two stays on overlapping dates.
+    -- no two stays in the same room on overlapping dates
     EXCLUDE USING gist (room_id WITH =, stay_period WITH &&)
 );
 
--- A CHECK constraint cannot look at another table, so this rule needs a trigger:
--- the room handed over at check-in must be in the same hotel as the booking.
+-- room must be in the same hotel as the booking
 CREATE FUNCTION check_stay_room_hotel() RETURNS trigger AS $$
 BEGIN
     IF (SELECT hotel_id FROM room WHERE room_id = NEW.room_id)
@@ -199,7 +178,7 @@ CREATE TABLE payment (
     currency_code    CHAR(3)      NOT NULL,
     pay_method       VARCHAR(15)  NOT NULL
         CHECK (pay_method IN ('Card', 'Bank Transfer', 'Cash', 'Points', 'Corporate')),
-    card_last4       CHAR(4)      CHECK (card_last4 ~ '^[0-9]{4}$'),  -- never the full card number
+    card_last4       CHAR(4)      CHECK (card_last4 ~ '^[0-9]{4}$'),   -- last 4 digits only
     pay_status       VARCHAR(10)  NOT NULL DEFAULT 'Captured'
         CHECK (pay_status IN ('Authorised', 'Captured', 'Refunded', 'Failed')),
     paid_at          TIMESTAMPTZ  NOT NULL DEFAULT now(),
@@ -209,12 +188,11 @@ CREATE TABLE payment (
 CREATE TABLE points_transaction (
     points_txn_id    SERIAL       PRIMARY KEY,
     account_id       INT          NOT NULL REFERENCES bonvoy_account(account_id),
-    reservation_id   INT          REFERENCES reservation(reservation_id),  -- NULL for promos/adjustments
+    reservation_id   INT          REFERENCES reservation(reservation_id),   -- null for bonuses
     txn_type         VARCHAR(10)  NOT NULL
         CHECK (txn_type IN ('Earn', 'Redeem', 'Bonus', 'Expire', 'Adjust')),
     points           INT          NOT NULL CHECK (points <> 0),
     created_at       TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    -- Earning adds points, redeeming and expiry take them away
     CHECK ((txn_type IN ('Earn', 'Bonus') AND points > 0)
         OR (txn_type IN ('Redeem', 'Expire') AND points < 0)
         OR  txn_type = 'Adjust')
@@ -228,11 +206,7 @@ CREATE TABLE review (
     created_at       TIMESTAMPTZ  NOT NULL DEFAULT now()
 );
 
--- ---------------------------------------------------------------------
--- 6. Indexes on foreign keys that are searched often.
---    (PostgreSQL indexes primary keys and UNIQUE columns automatically,
---     but not foreign keys.) Portfolio 2 tests further indexes.
--- ---------------------------------------------------------------------
+-- indexes on foreign keys (postgres doesn't create these automatically)
 CREATE INDEX idx_hotel_city          ON hotel(city_id);
 CREATE INDEX idx_room_hotel          ON room(hotel_id);
 CREATE INDEX idx_reservation_guest   ON reservation(guest_id);
