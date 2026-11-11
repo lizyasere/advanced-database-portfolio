@@ -1,0 +1,51 @@
+SET
+
+=== Test 1: check-out date before check-in date (CHECK constraint) ===
+psql:/scripts/p1/03_constraint_tests.sql:14: ERROR:  new row for relation "reservation" violates check constraint "reservation_check"
+DETAIL:  Failing row contains (15, TEST0001, 1, 1, 1, 1, 2026-12-10, 2026-12-08, 2, 310000.00, Web, Confirmed, 2026-11-11 15:25:33.208098+00).
+
+=== Test 2: two guests given the same physical room on overlapping nights (EXCLUDE constraint) ===
+BEGIN
+INSERT 0 1
+psql:/scripts/p1/03_constraint_tests.sql:33: ERROR:  conflicting key value violates exclusion constraint "stay_room_id_stay_period_excl"
+DETAIL:  Key (room_id, stay_period)=(21, [2026-11-10,2026-11-11)) conflicts with existing key (room_id, stay_period)=(21, [2026-11-08,2026-11-12)).
+ROLLBACK
+
+=== Test 3: Lagos room pointing at a Dubai room type (composite FOREIGN KEY) ===
+psql:/scripts/p1/03_constraint_tests.sql:42: ERROR:  insert or update on table "room" violates foreign key constraint "room_room_type_id_hotel_id_fkey"
+DETAIL:  Key (room_type_id, hotel_id)=(16, 3) is not present in table "room_type".
+
+=== Test 4: second guest registering with an email that already exists (UNIQUE) ===
+psql:/scripts/p1/03_constraint_tests.sql:47: ERROR:  duplicate key value violates unique constraint "guest_email_key"
+DETAIL:  Key (email)=(adaeze.okafor@example.com) already exists.
+
+=== Test 5: Bonvoy points balance going below zero (CHECK) ===
+psql:/scripts/p1/03_constraint_tests.sql:52: ERROR:  new row for relation "bonvoy_account" violates check constraint "bonvoy_account_points_balance_check"
+DETAIL:  Failing row contains (3, 3, 118230067, Member, -996900, 2024-01-11).
+
+=== Test 6: card payment with no card reference (CHECK across two columns) ===
+psql:/scripts/p1/03_constraint_tests.sql:57: ERROR:  new row for relation "payment" violates check constraint "payment_check"
+DETAIL:  Failing row contains (8, 1, 50000.00, NGN, Card, null, Captured, 2026-11-11 15:25:33.221075+00).
+
+=== Test 7: a "Redeem" points transaction that adds points (CHECK) ===
+psql:/scripts/p1/03_constraint_tests.sql:62: ERROR:  new row for relation "points_transaction" violates check constraint "points_transaction_check"
+DETAIL:  Failing row contains (6, 1, null, Redeem, 5000, 2026-11-11 15:25:33.222201+00).
+
+=== Test 8: booking a hotel that does not exist (FOREIGN KEY) ===
+psql:/scripts/p1/03_constraint_tests.sql:68: ERROR:  insert or update on table "reservation" violates foreign key constraint "reservation_room_type_id_hotel_id_fkey"
+DETAIL:  Key (room_type_id, hotel_id)=(1, 999) is not present in table "room_type".
+
+=== Test 9: invalid MARSHA code format (CHECK with regular expression) ===
+psql:/scripts/p1/03_constraint_tests.sql:73: ERROR:  new row for relation "hotel" violates check constraint "hotel_marsha_code_check"
+DETAIL:  Failing row contains (9, lag1 , Test Hotel, 1, 1, Somewhere, 5, NGN, null).
+
+=== Test 10: checking an Abuja guest into a room in Accra (TRIGGER) ===
+psql:/scripts/p1/03_constraint_tests.sql:81: ERROR:  Room 22 is not in the hotel of reservation 8
+CONTEXT:  PL/pgSQL function check_stay_room_hotel() line 5 at RAISE
+
+=== Control test: the same Accra booking in a DIFFERENT room (101) is accepted ===
+BEGIN
+INSERT 0 1
+INSERT 0 1
+ROLLBACK
+(control insert succeeded and was rolled back)

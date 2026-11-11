@@ -1,0 +1,143 @@
+erDiagram
+    COUNTRY ||--o{ CITY : "has"
+    COUNTRY ||--o{ GUEST : "nationality of"
+    CITY ||--o{ HOTEL : "located in"
+    BRAND ||--o{ HOTEL : "operates under"
+    HOTEL ||--o{ ROOM_TYPE : "offers"
+    HOTEL ||--o{ ROOM : "contains"
+    HOTEL ||--o{ STAFF : "employs"
+    ROOM_TYPE ||--o{ ROOM : "classifies"
+    ROOM_TYPE ||--o{ RESERVATION : "booked as"
+    HOTEL ||--o{ RESERVATION : "receives"
+    RATE_PLAN ||--o{ RESERVATION : "priced by"
+    GUEST ||--o{ RESERVATION : "makes"
+    GUEST ||--o| BONVOY_ACCOUNT : "holds"
+    RESERVATION ||--o| STAY : "fulfilled by"
+    ROOM ||--o{ STAY : "assigned to"
+    STAFF |o--o{ STAY : "checks in"
+    RESERVATION ||--o{ PAYMENT : "paid by"
+    RESERVATION ||--o| REVIEW : "reviewed in"
+    BONVOY_ACCOUNT ||--o{ POINTS_TRANSACTION : "records"
+    RESERVATION |o--o{ POINTS_TRANSACTION : "earns or redeems"
+
+    COUNTRY {
+        char country_code PK
+        varchar country_name UK
+        varchar region
+    }
+    CITY {
+        int city_id PK
+        varchar city_name
+        char country_code FK
+    }
+    BRAND {
+        int brand_id PK
+        varchar brand_name UK
+        varchar tier
+    }
+    HOTEL {
+        int hotel_id PK
+        char marsha_code UK
+        varchar hotel_name
+        int brand_id FK
+        int city_id FK
+        varchar address
+        smallint star_rating
+        char currency_code
+        date opened_on
+    }
+    STAFF {
+        int staff_id PK
+        int hotel_id FK
+        varchar first_name
+        varchar last_name
+        varchar job_role
+        date hired_on
+    }
+    ROOM_TYPE {
+        int room_type_id PK
+        int hotel_id FK
+        varchar type_code
+        varchar type_name
+        varchar bed_type
+        smallint max_occupancy
+        numeric base_rate
+    }
+    ROOM {
+        int room_id PK
+        int hotel_id FK
+        int room_type_id FK
+        varchar room_number
+        smallint floor_no
+        varchar room_status
+    }
+    RATE_PLAN {
+        int rate_plan_id PK
+        varchar rate_code UK
+        varchar rate_name
+        numeric discount_pct
+        boolean is_refundable
+        boolean members_only
+    }
+    GUEST {
+        int guest_id PK
+        varchar first_name
+        varchar last_name
+        varchar email UK
+        varchar phone
+        char nationality FK
+        date date_of_birth
+    }
+    BONVOY_ACCOUNT {
+        int account_id PK
+        int guest_id FK,UK
+        char member_number UK
+        varchar elite_tier
+        int points_balance
+        date enrolled_on
+    }
+    RESERVATION {
+        int reservation_id PK
+        varchar confirmation_no UK
+        int guest_id FK
+        int hotel_id FK
+        int room_type_id FK
+        int rate_plan_id FK
+        date check_in_date
+        date check_out_date
+        smallint num_guests
+        numeric nightly_rate
+        varchar booking_channel
+        varchar res_status
+    }
+    STAY {
+        int stay_id PK
+        int reservation_id FK,UK
+        int room_id FK
+        int checked_in_by FK
+        daterange stay_period
+        timestamptz actual_check_in
+        timestamptz actual_check_out
+    }
+    PAYMENT {
+        int payment_id PK
+        int reservation_id FK
+        numeric amount
+        char currency_code
+        varchar pay_method
+        char card_last4
+        varchar pay_status
+    }
+    POINTS_TRANSACTION {
+        int points_txn_id PK
+        int account_id FK
+        int reservation_id FK
+        varchar txn_type
+        int points
+    }
+    REVIEW {
+        int review_id PK
+        int reservation_id FK,UK
+        smallint rating
+        text review_text
+    }

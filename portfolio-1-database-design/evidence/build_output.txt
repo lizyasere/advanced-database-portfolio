@@ -1,0 +1,33 @@
+psql:/scripts/p1/01_schema.sql:11: NOTICE:  drop cascades to 16 other objects
+DETAIL:  drop cascades to extension btree_gist
+drop cascades to table crs.country
+drop cascades to table crs.city
+drop cascades to table crs.brand
+drop cascades to table crs.hotel
+drop cascades to table crs.staff
+drop cascades to table crs.room_type
+drop cascades to table crs.room
+drop cascades to table crs.rate_plan
+drop cascades to table crs.guest
+drop cascades to table crs.bonvoy_account
+drop cascades to table crs.reservation
+drop cascades to table crs.stay
+drop cascades to table crs.payment
+drop cascades to table crs.points_transaction
+drop cascades to table crs.review
+SET
+INSERT 0 6
+INSERT 0 6
+INSERT 0 8
+INSERT 0 8
+INSERT 0 24
+INSERT 0 160
+INSERT 0 5
+INSERT 0 8
+INSERT 0 12
+INSERT 0 9
+INSERT 0 14
+INSERT 0 6
+INSERT 0 7
+INSERT 0 5
+INSERT 0 3

@@ -1,0 +1,79 @@
+               List of relations
+ Schema |        Name        | Type  |  Owner  
+--------+--------------------+-------+---------
+ crs    | bonvoy_account     | table | mit8103
+ crs    | brand              | table | mit8103
+ crs    | city               | table | mit8103
+ crs    | country            | table | mit8103
+ crs    | guest              | table | mit8103
+ crs    | hotel              | table | mit8103
+ crs    | payment            | table | mit8103
+ crs    | points_transaction | table | mit8103
+ crs    | rate_plan          | table | mit8103
+ crs    | reservation        | table | mit8103
+ crs    | review             | table | mit8103
+ crs    | room               | table | mit8103
+ crs    | room_type          | table | mit8103
+ crs    | staff              | table | mit8103
+ crs    | stay               | table | mit8103
+(15 rows)
+
+                                                   Table "crs.reservation"
+     Column      |           Type           | Collation | Nullable |                         Default                         
+-----------------+--------------------------+-----------+----------+---------------------------------------------------------
+ reservation_id  | integer                  |           | not null | nextval('crs.reservation_reservation_id_seq'::regclass)
+ confirmation_no | character varying(12)    |           | not null | 
+ guest_id        | integer                  |           | not null | 
+ hotel_id        | integer                  |           | not null | 
+ room_type_id    | integer                  |           | not null | 
+ rate_plan_id    | integer                  |           | not null | 
+ check_in_date   | date                     |           | not null | 
+ check_out_date  | date                     |           | not null | 
+ num_guests      | smallint                 |           | not null | 
+ nightly_rate    | numeric(12,2)            |           | not null | 
+ booking_channel | character varying(15)    |           | not null | 
+ res_status      | character varying(12)    |           | not null | 'Confirmed'::character varying
+ booked_at       | timestamp with time zone |           | not null | now()
+Indexes:
+    "reservation_pkey" PRIMARY KEY, btree (reservation_id)
+    "idx_reservation_guest" btree (guest_id)
+    "reservation_confirmation_no_key" UNIQUE CONSTRAINT, btree (confirmation_no)
+Check constraints:
+    "reservation_booking_channel_check" CHECK (booking_channel::text = ANY (ARRAY['Web'::character varying, 'Mobile App'::character varying, 'Call Centre'::character varying, 'Travel Agent'::character varying, 'Walk-in'::character varying]::text[]))
+    "reservation_check" CHECK (check_out_date > check_in_date)
+    "reservation_nightly_rate_check" CHECK (nightly_rate >= 0::numeric)
+    "reservation_num_guests_check" CHECK (num_guests >= 1 AND num_guests <= 8)
+    "reservation_res_status_check" CHECK (res_status::text = ANY (ARRAY['Confirmed'::character varying, 'Checked In'::character varying, 'Checked Out'::character varying, 'Cancelled'::character varying, 'No Show'::character varying]::text[]))
+Foreign-key constraints:
+    "reservation_guest_id_fkey" FOREIGN KEY (guest_id) REFERENCES crs.guest(guest_id)
+    "reservation_rate_plan_id_fkey" FOREIGN KEY (rate_plan_id) REFERENCES crs.rate_plan(rate_plan_id)
+    "reservation_room_type_id_hotel_id_fkey" FOREIGN KEY (room_type_id, hotel_id) REFERENCES crs.room_type(room_type_id, hotel_id)
+Referenced by:
+    TABLE "crs.payment" CONSTRAINT "payment_reservation_id_fkey" FOREIGN KEY (reservation_id) REFERENCES crs.reservation(reservation_id)
+    TABLE "crs.points_transaction" CONSTRAINT "points_transaction_reservation_id_fkey" FOREIGN KEY (reservation_id) REFERENCES crs.reservation(reservation_id)
+    TABLE "crs.review" CONSTRAINT "review_reservation_id_fkey" FOREIGN KEY (reservation_id) REFERENCES crs.reservation(reservation_id)
+    TABLE "crs.stay" CONSTRAINT "stay_reservation_id_fkey" FOREIGN KEY (reservation_id) REFERENCES crs.reservation(reservation_id)
+
+                                                Table "crs.stay"
+      Column      |           Type           | Collation | Nullable |                  Default                  
+------------------+--------------------------+-----------+----------+-------------------------------------------
+ stay_id          | integer                  |           | not null | nextval('crs.stay_stay_id_seq'::regclass)
+ reservation_id   | integer                  |           | not null | 
+ room_id          | integer                  |           | not null | 
+ checked_in_by    | integer                  |           |          | 
+ stay_period      | daterange                |           | not null | 
+ actual_check_in  | timestamp with time zone |           | not null | now()
+ actual_check_out | timestamp with time zone |           |          | 
+Indexes:
+    "stay_pkey" PRIMARY KEY, btree (stay_id)
+    "stay_reservation_id_key" UNIQUE CONSTRAINT, btree (reservation_id)
+    "stay_room_id_stay_period_excl" EXCLUDE USING gist (room_id WITH =, stay_period WITH &&)
+Check constraints:
+    "stay_check" CHECK (actual_check_out IS NULL OR actual_check_out > actual_check_in)
+Foreign-key constraints:
+    "stay_checked_in_by_fkey" FOREIGN KEY (checked_in_by) REFERENCES crs.staff(staff_id)
+    "stay_reservation_id_fkey" FOREIGN KEY (reservation_id) REFERENCES crs.reservation(reservation_id)
+    "stay_room_id_fkey" FOREIGN KEY (room_id) REFERENCES crs.room(room_id)
+Triggers:
+    trg_stay_room_hotel BEFORE INSERT OR UPDATE ON crs.stay FOR EACH ROW EXECUTE FUNCTION crs.check_stay_room_hotel()
+

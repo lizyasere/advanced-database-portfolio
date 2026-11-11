@@ -1,0 +1,53 @@
+SET
+=== Row count per table ===
+     table_name     | count 
+--------------------+-------
+ country            |     6
+ city               |     6
+ brand              |     8
+ hotel              |     8
+ staff              |     8
+ room_type          |    24
+ room               |   160
+ rate_plan          |     5
+ guest              |    12
+ bonvoy_account     |     9
+ reservation        |    14
+ stay               |     6
+ payment            |     7
+ points_transaction |     5
+ review             |     3
+(15 rows)
+
+=== Hotels with brand, tier and location ===
+ marsha_code |            hotel_name             |   brand_name    |  tier   | city_name |     country_name     
+-------------+-----------------------------------+-----------------+---------+-----------+----------------------
+ ABVSI       | Sheraton Abuja Hotel              | Sheraton        | Premium | Abuja     | Nigeria
+ ACCMC       | Accra Marriott Hotel              | Marriott Hotels | Premium | Accra     | Ghana
+ LOSMC       | Lagos Marriott Hotel Ikeja        | Marriott Hotels | Premium | Lagos     | Nigeria
+ LOSFP       | Four Points by Sheraton Lagos     | Four Points     | Select  | Lagos     | Nigeria
+ LOSSI       | Sheraton Lagos Hotel              | Sheraton        | Premium | Lagos     | Nigeria
+ LONWH       | London Marriott Hotel County Hall | Marriott Hotels | Premium | London    | United Kingdom
+ DXBJW       | JW Marriott Marquis Hotel Dubai   | JW Marriott     | Luxury  | Dubai     | United Arab Emirates
+ NYCMQ       | New York Marriott Marquis         | Marriott Hotels | Premium | New York  | United States
+(8 rows)
+
+=== Reservations with guest, hotel, room type and total cost ===
+ confirmation_no |       guest       | marsha_code |    type_name    | rate_code | check_in_date | nights |      total       | res_status  
+-----------------+-------------------+-------------+-----------------+-----------+---------------+--------+------------------+-------------
+ 84213097        | Adaeze Okafor     | LOSMC       | Deluxe King     | MEMBER    | 2026-10-02    |      3 | NGN 883,500.00   | Checked Out
+ 84213354        | Oluwaseun Adeyemi | ABVSI       | Executive Suite | CORP      | 2026-10-12    |      3 | NGN 1,123,320.00 | Checked Out
+ 84214410        | Fatima Bello      | LOSFP       | Deluxe Twin     | ADVPUR    | 2026-10-20    |      2 | NGN 331,500.00   | Checked Out
+ 84218590        | Grace Etim        | LOSSI       | Deluxe Twin     | FLEX      | 2026-10-25    |      2 | NGN 480,000.00   | Cancelled
+ 84218905        | Adaeze Okafor     | DXBJW       | Deluxe King     | MEMBER    | 2026-10-28    |      2 | AED 1,805.00     | No Show
+ 84215902        | Kwame Mensah      | ACCMC       | Deluxe King     | MEMBER    | 2026-11-08    |      4 | GHS 13,680.00    | Checked In
+ 84216033        | Chinedu Okonkwo   | LOSSI       | Deluxe King     | FLEX      | 2026-11-09    |      4 | NGN 960,000.00   | Checked In
+ 84216588        | Sarah Thompson    | LONWH       | Deluxe King     | MEMBER    | 2026-11-10    |      4 | GBP 1,596.00     | Checked In
+ 84217120        | James Carter      | NYCMQ       | Executive Suite | POINTS    | 2026-11-20    |      3 | USD 0.00         | Confirmed
+ 84217455        | Amara Nnamdi      | LOSMC       | Deluxe Twin     | FLEX      | 2026-11-21    |      3 | NGN 930,000.00   | Confirmed
+ 84217809        | Yusuf Al-Hashimi  | DXBJW       | Executive Suite | MEMBER    | 2026-12-01    |      3 | AED 5,008.89     | Confirmed
+ 84218011        | Thandiwe Dlamini  | ABVSI       | Deluxe King     | ADVPUR    | 2026-12-05    |      3 | NGN 586,500.00   | Confirmed
+ 84218722        | Oluwaseun Adeyemi | LOSMC       | Executive Suite | CORP      | 2026-12-10    |      2 | NGN 1,009,360.00 | Confirmed
+ 84218376        | Bola Ogunleye     | LOSFP       | Deluxe King     | MEMBER    | 2026-12-18    |      4 | NGN 741,000.00   | Confirmed
+(14 rows)
+
