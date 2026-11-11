@@ -177,7 +177,7 @@ A good design also knows when a repeated value is actually a different fact:
 docker compose up -d
 docker exec marriott_postgres psql -U mit8103 -d marriott_crs -f /scripts/p1/01_schema.sql
 docker exec marriott_postgres psql -U mit8103 -d marriott_crs -f /scripts/p1/02_seed_data.sql
-docker exec marriott_postgres psql -U mit8103 -d marriott_crs -f /scripts/p1/03_constraint_tests.sql
+docker exec marriott_postgres sh -c "psql -U mit8103 -d marriott_crs -f /scripts/p1/03_constraint_tests.sql 2>&1"   # 2>&1 keeps errors in order
 docker exec marriott_postgres psql -U mit8103 -d marriott_crs -f /scripts/p1/04_verify_data.sql
 ```
 
@@ -221,3 +221,10 @@ ERROR:  Room 22 is not in the hotel of reservation 8
 a room in Accra. The overlap check fired, but it made me realise nothing stopped a stay from using
 a room in a different hotel from its booking. A `CHECK` constraint cannot do this, because it
 cannot read another table, so I added the `trg_stay_room_hotel` trigger and Test 10 to prove it.
+
+### Screenshots
+
+Running the tests in my own terminal:
+
+![Constraint tests 1 to 5](../screenshots/p1_constraint_tests_1.png)
+![Constraint tests 6 to 10 and control test](../screenshots/p1_constraint_tests_2.png)
