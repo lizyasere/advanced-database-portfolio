@@ -362,3 +362,42 @@ The Neo4j browser is at http://127.0.0.1:7474 (user `neo4j`, password `mit8103_p
 - MongoDB, Inc. (2024) *Schema Validation*. Available at: https://www.mongodb.com/docs/manual/core/schema-validation/
 - Neo4j, Inc. (2024) *Cypher Manual*. Available at: https://neo4j.com/docs/cypher-manual/current/
 - Reed, J. (2015) *Why Marriott is transforming their legacy systems with NoSQL*. diginomica. Available at: https://diginomica.com/why-marriott-is-transforming-their-legacy-systems-with-nosql
+
+## Screenshots
+
+These are my own runs. Timings and the race result change from run to run, so they differ
+from the saved evidence files, but the outcomes are the same every time.
+
+**Document queries:** the guest profile in one read, using the email index (1 key, 1 document examined)
+
+![Guest profile document](../screenshots/p4_document_queries1.png)
+
+![Booking history and flexible hotel features](../screenshots/p4_document_queries2.png)
+
+**Aggregation, single-document update and validation:** the bad booking is rejected, the new field is accepted
+
+![Aggregation, payment update and validation](../screenshots/p4_document_queries3.png)
+
+**Last suite race:** in this run read-then-write told 3 guests they had booked (6 of 4 sold);
+the atomic update booked exactly 1
+
+![Availability race test](../screenshots/p4_race_availability.png)
+
+**PostgreSQL and MongoDB on the same screens:** this run was taken while Neo4j and its browser
+were also running, so every time is higher than in the table in section 4, but the pattern is
+the same: the booking screen drops from 36.7 ms to 1.5 ms with the missing index, and
+PostgreSQL is far ahead on the brand report
+
+![PostgreSQL and MongoDB comparison](../screenshots/p4_compare.png)
+
+**Graph queries in Cypher:** guests who also stayed at, cities shared with Lagos, recommendations
+
+![Graph queries 1 to 3](../screenshots/p4_graph_queries1.png)
+
+**Shortest path between two guests, and the most travelled elite members**
+
+![Graph queries 3 to 5](../screenshots/p4_graph_queries2.png)
+
+**Neo4j browser:** Layla Chen, the hotels she stayed at and their cities
+
+![Layla Chen's stays in the Neo4j browser](../screenshots/p4_graph_browser.png)
