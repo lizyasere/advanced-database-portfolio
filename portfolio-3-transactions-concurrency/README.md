@@ -286,3 +286,25 @@ python portfolio-3-transactions-concurrency/run_scenario.py overbook_rc   # runs
 - PostgreSQL Global Development Group (2024) *PostgreSQL 16 Documentation: Transaction Isolation*. Available at: https://www.postgresql.org/docs/16/transaction-iso.html
 - PostgreSQL Global Development Group (2024) *PostgreSQL 16 Documentation: Explicit Locking*. Available at: https://www.postgresql.org/docs/16/explicit-locking.html
 - PostgreSQL Global Development Group (2024) *PostgreSQL 16 Documentation: Write-Ahead Logging (WAL)*. Available at: https://www.postgresql.org/docs/16/wal-intro.html
+
+## Screenshots
+
+These are my own runs of the scenarios. The timings differ by a fraction of a second from the
+saved evidence files, because no two concurrent runs are exactly the same, but the outcomes
+are identical every time.
+
+**Last suite, READ COMMITTED:** both sessions see 1 suite free, both book it, 5 bookings for 4 suites
+
+![Overbooking under READ COMMITTED](../screenshots/p3_overbook_rc.png)
+
+**Last suite, SELECT ... FOR UPDATE:** B waits for the lock, then sees 0 free and is refused
+
+![Booking with row locking](../screenshots/p3_overbook_locking.png)
+
+**Lost update:** both sessions read 50,000; the final balance is 52,500 but the transactions add up to 53,500
+
+![Lost update on Bonvoy points](../screenshots/p3_lost_update.png)
+
+**Deadlock:** PostgreSQL detects the cycle and rolls back session A
+
+![Deadlock on points transfers](../screenshots/p3_deadlock.png)
