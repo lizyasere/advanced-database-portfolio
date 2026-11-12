@@ -22,7 +22,7 @@ I picked Marriott because its own technology story lines up well with the topics
 | What happened at Marriott | Where I use it |
 |---|---|
 | Its old reservation system, Marsha, ran on one mainframe. In 2015 Marriott began moving it to a NoSQL database (Couchbase) to cut costs and scale out across data centres. | Portfolio 4 |
-| Since 2025 it has been moving to a new cloud based reservation system built with Amadeus. | Portfolio 5 |
+| In 2021 it agreed to replace its own reservation system with Amadeus's cloud based central reservation system. By September 2025 its new cloud reservation, property and loyalty systems were being trialled at six hotels, with a phased rollout planned over 18 months. | Portfolio 5 |
 | Hackers sat inside the Starwood reservation database from 2014 until 2018 and exposed about 339 million guest records. The UK regulator fined Marriott £18.4 million in 2020. | Portfolio 1 and my reflection |
 | Hotels in 145 countries all sell rooms from the same inventory at the same time. | Portfolios 3 and 5 |
 
@@ -81,8 +81,9 @@ uses 5432.
 
 ## References
 
-- Amadeus (n.d.) *Marriott International to deploy transformative CRS solution*. Available at: https://amadeus.com/en/newsroom/press-releases/marriott-international-to-deploy-transformative-crs-solution
+- Amadeus (2021) *Amadeus Announces Agreement with Marriott International to Deploy Transformative, Cloud-based CRS Solution*. Available at: https://amadeus.com/en/newsroom/press-releases/marriott-international-to-deploy-transformative-crs-solution
 - Business Traveller (2020) *Marriott International fined £18.4 million for data breach*. Available at: https://www.businesstraveller.com/business-travel/2020/11/02/marriott-international-fined-18-4-million-for-data-breach/
+- Hotel Technology News (2025) *Marriott Bets on Cloud-Native Platforms, AI Agents and Unified Guest Data to Power Smarter Hotel Operations*. Available at: https://hoteltechnologynews.com/2025/09/marriott-bets-on-cloud-native-platforms-ai-agents-and-unified-guest-data-to-power-smarter-hotel-operations/
 - Marriott International (2026) *Marriott International Reports Fourth Quarter and Full Year 2025 Results*. Available at: https://marriott.gcs-web.com/news-releases/news-release-details/marriott-international-reports-fourth-quarter-and-full-year-2025
 - Marriott International (n.d.) *Hotels in Nigeria*. Available at: https://www.marriott.com/en/destinations/nigeria.mi
 - MIVA Open University (2025) *MIT 8103 Advanced Database Systems*. Course material, Study Sessions One to Six.
