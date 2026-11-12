@@ -139,3 +139,62 @@ timestamps from different machines, which matters even more in a distributed dat
   showed it being replayed.
 * Every fix has a cost. Locking makes people queue and SERIALIZABLE needs retries. For hotel
   rooms I think queuing is the right price, because the alternative is a guest with no room.
+
+## Portfolio 4: NoSQL and advanced data models
+
+**Design choices.** I used the same million bookings from Portfolio 2 instead of a small new
+sample, so I could compare the models fairly. Rather than writing a separate converter, I made
+PostgreSQL build each MongoDB document as a line of JSON and streamed it straight into
+`mongoimport`. That way nothing large was saved on my laptop, and dates and money arrived as
+real dates and exact decimals instead of text.
+
+The hardest part of the document model was deciding what to embed. I embedded room types in
+hotels, the Bonvoy account in the guest, and payments and points in the booking, because each of
+those belongs to one parent and is always shown with it. I did not embed a guest's full booking
+history, only the last three, because a frequent traveller could have hundreds of bookings and
+the document would keep growing.
+
+I used three models instead of one: documents for the app screens, a key-value store for room
+availability, and Neo4j for the graph, because Study Session Five spends most of its time on
+graph databases and Neo4j.
+
+**Challenges.** PostgreSQL's `jsonb` type sorted the keys of every document, so a booking began
+with "channel" and "check_in" instead of the confirmation number. Switching to the plain `json`
+type kept the fields in the order I wrote them.
+
+Escaping caught me more than once. A shell command cut one of my SQL files short, and in the
+race test the backslashes in my key pattern were stripped twice, so the status line matched
+every key in the store instead of three. I only noticed because the output was suddenly huge.
+In the end I replaced the pattern with the three exact keys, which is clearer anyway. I also
+found out that `similar` is a reserved word in PostgreSQL (from `SIMILAR TO`) when my
+recommendation query would not run.
+
+The comparison with PostgreSQL did not come out the way I expected. MongoDB looked slower on
+the guest profile until I timed an empty `ping` and saw that the shell itself adds about 2 ms to
+every call. The booking screen was slow in PostgreSQL, but the reason was a missing index on
+`points_transaction.reservation_id` in my own design, not the relational model.
+
+My first graph query said a member had stayed in 21 countries, which was impossible because no
+guest has more than 17 bookings. I had grouped by name, and 900 names in my data belong to more
+than one person.
+
+**What I learned.**
+* NoSQL is not faster in general. For screens that show one thing, MongoDB and PostgreSQL were
+  about the same once I removed the client overhead. For the brand report across a year of
+  bookings, PostgreSQL was 13 times faster.
+* The document model's real advantage was fewer joins to get wrong. The missing index I found
+  could not happen in MongoDB, because the points are inside the booking.
+* "Schemaless" does not have to mean no rules. A `$jsonSchema` validator rejected a booking with
+  0 nights but still accepted a new optional field.
+* The overbooking problem from Portfolio 3 came back in a new form. Reading the count and then
+  writing it oversold the last suite every time I tried. Making the check and the change one
+  atomic update fixed it.
+* Without multi-document transactions, a multi-night booking had to give back the nights it
+  had already taken when a later night was full. That made the difference between ACID and BASE
+  from Study Session Two concrete for me.
+* Graph queries were about three and a half times faster than the same questions in SQL, and much
+  easier to read. A shortest path between two guests is one line in Cypher; in SQL I would have
+  needed a recursive query.
+* A name is not an identifier, whether the data is in a table or a graph.
+* I checked the article about Marriott and Couchbase before quoting it. It did not say some of
+  the things I had assumed, so I only used what it actually reported.
