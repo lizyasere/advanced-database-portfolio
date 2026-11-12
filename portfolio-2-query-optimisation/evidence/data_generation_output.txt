@@ -1,0 +1,32 @@
+SET
+ setseed 
+---------
+ 
+(1 row)
+
+INSERT 0 15
+CREATE TABLE
+INSERT 0 33
+INSERT 0 27
+INSERT 0 190
+INSERT 0 570
+INSERT 0 39799
+INSERT 0 200000
+INSERT 0 120118
+SELECT 1
+INSERT 0 1000000
+INSERT 0 716969
+INSERT 0 424076
+INSERT 0 16417
+VACUUM
+     table_name     |  count  
+--------------------+---------
+ hotel              |     198
+ room               |   39959
+ bonvoy_account     |  120127
+ guest              |  200012
+ points_transaction |  440498
+ payment            |  716976
+ reservation        | 1000014
+(7 rows)
+
