@@ -1,0 +1,95 @@
+SET
+=== Q1 Room availability: Deluxe King at Lagos Marriott Ikeja, 18 to 22 Dec 2026 ===
+  type_name  | total_rooms | booked 
+-------------+-------------+--------
+ Deluxe King |           8 |     10
+(1 row)
+
+=== Q2 Guest lookup by email, typed with different capitals ===
+ first_name | last_name | confirmation_no |             hotel_name             | check_in_date | res_status  
+------------+-----------+-----------------+------------------------------------+---------------+-------------
+ Adaeze     | Okafor    | 90296794        | Westin Marrakech Central           | 2027-05-31    | Confirmed
+ Adaeze     | Okafor    | 84218905        | JW Marriott Marquis Hotel Dubai    | 2026-10-28    | No Show
+ Adaeze     | Okafor    | 84213097        | Lagos Marriott Hotel Ikeja         | 2026-10-02    | Checked Out
+ Adaeze     | Okafor    | 90073110        | Courtyard Abuja Business District  | 2025-12-18    | Checked Out
+ Adaeze     | Okafor    | 90237278        | Courtyard London Business District | 2024-05-10    | Checked Out
+ Adaeze     | Okafor    | 90299109        | Four Points by Sheraton Lagos      | 2024-01-21    | Checked Out
+(6 rows)
+
+=== Q3a Monthly revenue for Lagos hotels in 2026 (first version) ===
+            hotel_name             |   month    | bookings | revenue_ngn  
+-----------------------------------+------------+----------+--------------
+ Courtyard Lagos Business District | 2026-01-01 |      100 |  93873577.90
+ Courtyard Lagos Business District | 2026-02-01 |      102 |  81194536.60
+ Courtyard Lagos Business District | 2026-03-01 |      127 | 111392115.41
+ Courtyard Lagos Business District | 2026-04-01 |      105 |  90229280.39
+ Courtyard Lagos Business District | 2026-05-01 |       88 |  81236100.00
+ Courtyard Lagos Business District | 2026-06-01 |      110 |  91384099.55
+ Courtyard Lagos Business District | 2026-07-01 |      119 | 116793313.21
+ Courtyard Lagos Business District | 2026-08-01 |      108 | 108560648.05
+ Courtyard Lagos Business District | 2026-09-01 |       93 |  81668853.86
+ Courtyard Lagos Business District | 2026-10-01 |      116 | 100017043.02
+ Courtyard Lagos Business District | 2026-11-01 |       50 |  46369482.97
+ Four Points by Sheraton Lagos     | 2026-01-01 |       96 |  65684385.00
+ Four Points by Sheraton Lagos     | 2026-02-01 |      100 |  67366650.00
+ Four Points by Sheraton Lagos     | 2026-03-01 |      104 |  73596607.50
+ Four Points by Sheraton Lagos     | 2026-04-01 |      101 |  66002917.50
+(15 rows)
+
+=== Q3b Same report, date filter rewritten as a range ===
+            hotel_name             |   month    | bookings | revenue_ngn  
+-----------------------------------+------------+----------+--------------
+ Courtyard Lagos Business District | 2026-01-01 |      100 |  93873577.90
+ Courtyard Lagos Business District | 2026-02-01 |      102 |  81194536.60
+ Courtyard Lagos Business District | 2026-03-01 |      127 | 111392115.41
+ Courtyard Lagos Business District | 2026-04-01 |      105 |  90229280.39
+ Courtyard Lagos Business District | 2026-05-01 |       88 |  81236100.00
+ Courtyard Lagos Business District | 2026-06-01 |      110 |  91384099.55
+ Courtyard Lagos Business District | 2026-07-01 |      119 | 116793313.21
+ Courtyard Lagos Business District | 2026-08-01 |      108 | 108560648.05
+ Courtyard Lagos Business District | 2026-09-01 |       93 |  81668853.86
+ Courtyard Lagos Business District | 2026-10-01 |      116 | 100017043.02
+ Courtyard Lagos Business District | 2026-11-01 |       50 |  46369482.97
+ Four Points by Sheraton Lagos     | 2026-01-01 |       96 |  65684385.00
+ Four Points by Sheraton Lagos     | 2026-02-01 |      100 |  67366650.00
+ Four Points by Sheraton Lagos     | 2026-03-01 |      104 |  73596607.50
+ Four Points by Sheraton Lagos     | 2026-04-01 |      101 |  66002917.50
+(15 rows)
+
+=== Q4 Front desk arrivals list: Lagos Marriott Ikeja, 12 Nov 2026 ===
+ confirmation_no | last_name | first_name |    type_name    | num_guests | bonvoy_tier  
+-----------------+-----------+------------+-----------------+------------+--------------
+ 90495562        | Muller    | Carlos     | Deluxe Twin     |          2 | Gold Elite
+ 90800143        | Silva     | Bola       | Executive Suite |          2 | Not a member
+(2 rows)
+
+=== Q5 Top 10 Bonvoy members by points earned in the last 12 months ===
+ member_number |     member     |   elite_tier   | points_earned | position 
+---------------+----------------+----------------+---------------+----------
+ 200035538     | Thabo Boateng  | Gold Elite     |         50829 |        1
+ 200118904     | Thabo Dlamini  | Member         |         50502 |        2
+ 200191281     | Sarah Dlamini  | Member         |         45886 |        3
+ 200013826     | Carlos Patel   | Member         |         45074 |        4
+ 200023307     | Priya Bello    | Platinum Elite |         44084 |        5
+ 200165495     | Ama Smith      | Member         |         43636 |        6
+ 200025899     | Sarah Rahman   | Gold Elite     |         42802 |        7
+ 200132579     | Chinedu Tanaka | Silver Elite   |         42269 |        8
+ 200100975     | Yuki Musa      | Member         |         41390 |        9
+ 200023500     | Wei Mensah     | Member         |         40763 |       10
+(10 rows)
+
+=== Q5b Same top 10, rewritten: total per account, keep the top 10, then join names ===
+ member_number |     member     |   elite_tier   | points_earned | position 
+---------------+----------------+----------------+---------------+----------
+ 200035538     | Thabo Boateng  | Gold Elite     |         50829 |        1
+ 200118904     | Thabo Dlamini  | Member         |         50502 |        2
+ 200191281     | Sarah Dlamini  | Member         |         45886 |        3
+ 200013826     | Carlos Patel   | Member         |         45074 |        4
+ 200023307     | Priya Bello    | Platinum Elite |         44084 |        5
+ 200165495     | Ama Smith      | Member         |         43636 |        6
+ 200025899     | Sarah Rahman   | Gold Elite     |         42802 |        7
+ 200132579     | Chinedu Tanaka | Silver Elite   |         42269 |        8
+ 200100975     | Yuki Musa      | Member         |         41390 |        9
+ 200023500     | Wei Mensah     | Member         |         40763 |       10
+(10 rows)
+
