@@ -21,7 +21,7 @@ I picked Marriott because its own technology story lines up well with the topics
 
 | What happened at Marriott | Where I use it |
 |---|---|
-| Its old reservation system, MARSHA, ran on one mainframe. Parts of it were later moved to a NoSQL database (Couchbase) because guests expected faster answers online. | Portfolio 4 |
+| Its old reservation system, Marsha, ran on one mainframe. In 2015 Marriott began moving it to a NoSQL database (Couchbase) to cut costs and scale out across data centres. | Portfolio 4 |
 | Since 2025 it has been moving to a new cloud based reservation system built with Amadeus. | Portfolio 5 |
 | Hackers sat inside the Starwood reservation database from 2014 until 2018 and exposed about 339 million guest records. The UK regulator fined Marriott £18.4 million in 2020. | Portfolio 1 and my reflection |
 | Hotels in 145 countries all sell rooms from the same inventory at the same time. | Portfolios 3 and 5 |
@@ -42,7 +42,7 @@ I picked Marriott because its own technology story lines up well with the topics
 | `portfolio-1-database-design/` | ER diagram, relational schema, keys, constraints and normalisation | Complete |
 | `portfolio-2-query-optimisation/` | SQL queries, execution plans, indexing and performance results | Complete |
 | `portfolio-3-transactions-concurrency/` | Commit and rollback, isolation levels, stopping double bookings | Complete |
-| `portfolio-4-nosql/` | MongoDB model of the same Marriott data | Not started |
+| `portfolio-4-nosql/` | Document, key-value and graph models of the same Marriott data (MongoDB and Neo4j) | Complete |
 | `portfolio-5-distributed-cloud/` | Replication, sharding and consistency, with a working setup | Not started |
 | `docs/` | Final documentation submitted on the LMS | Not started |
 | `screenshots/` | Screenshots used as evidence across all portfolios | |
@@ -52,10 +52,10 @@ I picked Marriott because its own technology story lines up well with the topics
 | Study session | Main topics | Where I applied it |
 |---|---|---|
 | One: Review of Traditional Relational Databases and Advanced Concepts | Design stages, characteristics of a good database, normalisation (1NF to BCNF) | Portfolio 1: followed the design stages from requirements to testing, normalised a flat booking sheet to BCNF, and kept two columns denormalised on purpose |
-| Two: Distributed Database System | Fragmentation, replication, consistency, CAP theorem, ACID vs BASE | Portfolio 3: tested all four ACID properties, including a crash test for durability. Portfolio 5: replication, sharding and the CAP trade-off for hotels in many countries |
+| Two: Distributed Database System | Fragmentation, replication, consistency, CAP theorem, ACID vs BASE | Portfolio 3: tested all four ACID properties, including a crash test for durability. Portfolio 4: a multi-night booking in a key-value store that gives nights back instead of using a transaction (BASE). Portfolio 5: replication, sharding and the CAP trade-off for hotels in many countries |
 | Three: Big Data and Cloud Database Systems | Cloud databases and their uses, data warehouses, security | Portfolio 5: running the Marriott data on a cloud database service |
 | Four: Query Optimisation in Database | Cost-based optimisation, execution plans, cost estimation, indexing and file organisation | Portfolio 2: read execution plans, compared estimated and actual rows, added partial, expression and covering indexes, and measured their cost |
-| Five: Emerging Trends in Database Systems | Graph databases, serverless and edge databases | Portfolio 4: NoSQL models of the same Marriott data, including a graph view of guests, hotels and stays |
+| Five: Emerging Trends in Database Systems | Graph databases, serverless and edge databases | Portfolio 4: a graph of guests, hotels, cities and countries in Neo4j, queried in Cypher for recommendations and link analysis, and compared with the same questions in SQL |
 | Six: Introduction to Data Security and Data Privacy | Privacy challenges, privacy by design | Portfolio 1: no passport numbers or full card numbers stored, based on the Starwood breach |
 
 ## Setup
