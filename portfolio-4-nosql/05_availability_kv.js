@@ -2,8 +2,7 @@
 // docker exec marriott_mongo mongosh --quiet /scripts/p4/05_availability_kv.js
 //
 // Searching for a room is far more common than booking one, so the availability check
-// should be a single key lookup, not a query over all bookings. This is the kind of
-// workload Marriott moved off its mainframe onto a NoSQL database.
+// should be a single key lookup, not a query over all bookings.
 
 load("/scripts/p4/kv_book.js");
 db = db.getSiblingDB("marriott");
