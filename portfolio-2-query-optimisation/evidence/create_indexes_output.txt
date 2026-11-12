@@ -1,0 +1,33 @@
+SET
+Timing is on.
+CREATE INDEX
+Time: 436.731 ms
+CREATE INDEX
+Time: 1159.404 ms (00:01.159)
+CREATE INDEX
+Time: 2530.302 ms (00:02.530)
+CREATE INDEX
+Time: 433.779 ms
+ANALYZE
+Time: 247.845 ms
+ANALYZE
+Time: 423.752 ms
+ANALYZE
+Time: 98.072 ms
+=== Index sizes compared with their tables ===
+           index_name            |     table_name     | index_size | table_size 
+---------------------------------+--------------------+------------+------------
+ guest_email_key                 | guest              | 13 MB      | 21 MB
+ idx_guest_email_lower           | guest              | 9944 kB    | 21 MB
+ guest_pkey                      | guest              | 4408 kB    | 21 MB
+ idx_points_earn_date            | points_transaction | 13 MB      | 25 MB
+ points_transaction_pkey         | points_transaction | 9680 kB    | 25 MB
+ idx_points_account              | points_transaction | 8312 kB    | 25 MB
+ idx_res_hotel_checkin           | reservation        | 48 MB      | 105 MB
+ reservation_confirmation_no_key | reservation        | 30 MB      | 105 MB
+ reservation_pkey                | reservation        | 21 MB      | 105 MB
+ idx_reservation_guest           | reservation        | 16 MB      | 105 MB
+ idx_res_roomtype_active         | reservation        | 4960 kB    | 105 MB
+(11 rows)
+
+Time: 18.815 ms

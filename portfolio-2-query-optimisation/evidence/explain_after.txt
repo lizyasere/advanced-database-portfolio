@@ -1,0 +1,257 @@
+SET
+=== Q1 Room availability: Deluxe King at Lagos Marriott Ikeja, 18 to 22 Dec 2026 ===
+                                                                         QUERY PLAN                                                                         
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Nested Loop  (cost=0.28..817.28 rows=1 width=29) (actual time=2.704..2.731 rows=1 loops=1)
+   Buffers: shared hit=304
+   ->  Seq Scan on hotel h  (cost=0.00..5.47 rows=1 width=4) (actual time=0.014..0.037 rows=1 loops=1)
+         Filter: (marsha_code = 'LOSMC'::bpchar)
+         Rows Removed by Filter: 197
+         Buffers: shared hit=3
+   ->  Index Scan using room_type_hotel_id_type_code_key on room_type rt  (cost=0.28..8.29 rows=1 width=21) (actual time=0.012..0.013 rows=1 loops=1)
+         Index Cond: ((hotel_id = h.hotel_id) AND ((type_code)::text = 'DLXK'::text))
+         Buffers: shared hit=3
+   SubPlan 1
+     ->  Aggregate  (cost=793.65..793.66 rows=1 width=8) (actual time=2.580..2.581 rows=1 loops=1)
+           Buffers: shared hit=294
+           ->  Seq Scan on room rm  (cost=0.00..793.49 rows=67 width=0) (actual time=0.010..2.576 rows=8 loops=1)
+                 Filter: (room_type_id = rt.room_type_id)
+                 Rows Removed by Filter: 39951
+                 Buffers: shared hit=294
+   SubPlan 2
+     ->  Aggregate  (cost=9.75..9.76 rows=1 width=8) (actual time=0.084..0.084 rows=1 loops=1)
+           Buffers: shared hit=4
+           ->  Index Only Scan using idx_res_roomtype_active on reservation r  (cost=0.42..9.66 rows=36 width=0) (actual time=0.078..0.079 rows=10 loops=1)
+                 Index Cond: ((room_type_id = rt.room_type_id) AND (check_in_date < '2026-12-22'::date))
+                 Filter: (check_out_date > '2026-12-18'::date)
+                 Rows Removed by Filter: 41
+                 Heap Fetches: 0
+                 Buffers: shared hit=4
+ Planning:
+   Buffers: shared hit=496
+ Planning Time: 2.312 ms
+ Execution Time: 2.816 ms
+(29 rows)
+
+=== Q2 Guest lookup by email, typed with different capitals ===
+                                                                    QUERY PLAN                                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=37.53..37.55 rows=5 width=66) (actual time=0.868..0.872 rows=6 loops=1)
+   Sort Key: r.check_in_date DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=27
+   ->  Nested Loop  (cost=5.04..37.48 rows=5 width=66) (actual time=0.233..0.827 rows=6 loops=1)
+         Buffers: shared hit=24
+         ->  Nested Loop  (cost=4.89..36.66 rows=5 width=40) (actual time=0.198..0.760 rows=6 loops=1)
+               Buffers: shared hit=12
+               ->  Index Scan using idx_guest_email_lower on guest g  (cost=0.42..8.44 rows=1 width=16) (actual time=0.157..0.160 rows=1 loops=1)
+                     Index Cond: (lower((email)::text) = 'adaeze.okafor@example.com'::text)
+                     Buffers: shared hit=4
+               ->  Bitmap Heap Scan on reservation r  (cost=4.47..28.17 rows=6 width=32) (actual time=0.033..0.585 rows=6 loops=1)
+                     Recheck Cond: (g.guest_id = guest_id)
+                     Heap Blocks: exact=5
+                     Buffers: shared hit=8
+                     ->  Bitmap Index Scan on idx_reservation_guest  (cost=0.00..4.47 rows=6 width=0) (actual time=0.019..0.019 rows=6 loops=1)
+                           Index Cond: (guest_id = g.guest_id)
+                           Buffers: shared hit=3
+         ->  Index Scan using hotel_pkey on hotel h  (cost=0.14..0.16 rows=1 width=34) (actual time=0.009..0.009 rows=1 loops=6)
+               Index Cond: (hotel_id = r.hotel_id)
+               Buffers: shared hit=12
+ Planning:
+   Buffers: shared hit=115
+ Planning Time: 1.612 ms
+ Execution Time: 0.936 ms
+(25 rows)
+
+=== Q3a Monthly revenue for Lagos hotels in 2026 (first version) ===
+                                                                                QUERY PLAN                                                                                
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=1283.07..1283.67 rows=15 width=74) (actual time=37.608..38.140 rows=15 loops=1)
+   Buffers: shared hit=555
+   ->  GroupAggregate  (cost=1283.07..1287.47 rows=110 width=74) (actual time=37.605..38.135 rows=15 loops=1)
+         Group Key: h.hotel_name, ((date_trunc('month'::text, (r.check_in_date)::timestamp with time zone))::date)
+         Buffers: shared hit=555
+         ->  Sort  (cost=1283.07..1283.34 rows=110 width=49) (actual time=37.546..37.624 rows=1520 loops=1)
+               Sort Key: h.hotel_name, ((date_trunc('month'::text, (r.check_in_date)::timestamp with time zone))::date)
+               Sort Method: quicksort  Memory: 2022kB
+               Buffers: shared hit=555
+               ->  Nested Loop  (cost=0.42..1279.34 rows=110 width=49) (actual time=1.093..27.934 rows=16628 loops=1)
+                     Buffers: shared hit=552
+                     ->  Nested Loop  (cost=0.00..8.87 rows=6 width=34) (actual time=0.020..0.083 rows=15 loops=1)
+                           Join Filter: (h.city_id = c.city_id)
+                           Rows Removed by Join Filter: 183
+                           Buffers: shared hit=4
+                           ->  Seq Scan on city c  (cost=0.00..1.41 rows=1 width=4) (actual time=0.014..0.019 rows=1 loops=1)
+                                 Filter: ((city_name)::text = 'Lagos'::text)
+                                 Rows Removed by Filter: 32
+                                 Buffers: shared hit=1
+                           ->  Seq Scan on hotel h  (cost=0.00..4.98 rows=198 width=38) (actual time=0.003..0.029 rows=198 loops=1)
+                                 Buffers: shared hit=3
+                     ->  Index Only Scan using idx_res_hotel_checkin on reservation r  (cost=0.42..211.43 rows=18 width=19) (actual time=0.785..1.434 rows=1109 loops=15)
+                           Index Cond: (hotel_id = h.hotel_id)
+                           Filter: (((res_status)::text = ANY ('{"Checked Out","Checked In"}'::text[])) AND (EXTRACT(year FROM check_in_date) = '2026'::numeric))
+                           Rows Removed by Filter: 3920
+                           Heap Fetches: 0
+                           Buffers: shared hit=548
+ Planning:
+   Buffers: shared hit=92
+ Planning Time: 0.899 ms
+ Execution Time: 38.507 ms
+(31 rows)
+
+=== Q3b Same report, date filter rewritten as a range ===
+                                                                                QUERY PLAN                                                                                 
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=917.77..917.80 rows=15 width=74) (actual time=48.996..49.007 rows=15 loops=1)
+   Buffers: shared hit=193
+   ->  Sort  (cost=917.77..933.51 rows=6298 width=74) (actual time=48.993..48.999 rows=15 loops=1)
+         Sort Key: h.hotel_name, ((date_trunc('month'::text, (r.check_in_date)::timestamp with time zone))::date)
+         Sort Method: top-N heapsort  Memory: 28kB
+         Buffers: shared hit=193
+         ->  HashAggregate  (cost=637.29..763.25 rows=6298 width=74) (actual time=48.756..48.885 rows=121 loops=1)
+               Group Key: h.hotel_name, (date_trunc('month'::text, (r.check_in_date)::timestamp with time zone))::date
+               Batches: 1  Memory Usage: 273kB
+               Buffers: shared hit=193
+               ->  Nested Loop  (cost=0.42..527.07 rows=6298 width=49) (actual time=0.036..27.572 rows=16628 loops=1)
+                     Buffers: shared hit=193
+                     ->  Nested Loop  (cost=0.00..8.87 rows=6 width=34) (actual time=0.015..0.158 rows=15 loops=1)
+                           Join Filter: (h.city_id = c.city_id)
+                           Rows Removed by Join Filter: 183
+                           Buffers: shared hit=4
+                           ->  Seq Scan on city c  (cost=0.00..1.41 rows=1 width=4) (actual time=0.009..0.016 rows=1 loops=1)
+                                 Filter: ((city_name)::text = 'Lagos'::text)
+                                 Rows Removed by Filter: 32
+                                 Buffers: shared hit=1
+                           ->  Seq Scan on hotel h  (cost=0.00..4.98 rows=198 width=38) (actual time=0.003..0.070 rows=198 loops=1)
+                                 Buffers: shared hit=3
+                     ->  Index Only Scan using idx_res_hotel_checkin on reservation r  (cost=0.42..67.99 rows=1050 width=19) (actual time=0.024..0.837 rows=1109 loops=15)
+                           Index Cond: ((hotel_id = h.hotel_id) AND (check_in_date >= '2026-01-01'::date) AND (check_in_date < '2027-01-01'::date))
+                           Filter: ((res_status)::text = ANY ('{"Checked Out","Checked In"}'::text[]))
+                           Rows Removed by Filter: 329
+                           Heap Fetches: 0
+                           Buffers: shared hit=189
+ Planning:
+   Buffers: shared hit=15
+ Planning Time: 0.473 ms
+ Execution Time: 49.123 ms
+(32 rows)
+
+=== Q4 Front desk arrivals list: Lagos Marriott Ikeja, 12 Nov 2026 ===
+                                                                             QUERY PLAN                                                                              
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=34.92..34.92 rows=1 width=68) (actual time=0.296..0.301 rows=2 loops=1)
+   Sort Key: g.last_name, g.first_name
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=27
+   ->  Nested Loop Left Join  (cost=1.41..34.91 rows=1 width=68) (actual time=0.172..0.269 rows=2 loops=1)
+         Buffers: shared hit=27
+         ->  Nested Loop  (cost=1.12..34.57 rows=1 width=40) (actual time=0.154..0.240 rows=2 loops=1)
+               Buffers: shared hit=22
+               ->  Nested Loop  (cost=0.84..33.96 rows=1 width=31) (actual time=0.140..0.220 rows=2 loops=1)
+                     Buffers: shared hit=16
+                     ->  Nested Loop  (cost=0.42..26.00 rows=1 width=19) (actual time=0.093..0.151 rows=2 loops=1)
+                           Buffers: shared hit=8
+                           ->  Seq Scan on hotel h  (cost=0.00..5.47 rows=1 width=4) (actual time=0.031..0.074 rows=1 loops=1)
+                                 Filter: (marsha_code = 'LOSMC'::bpchar)
+                                 Rows Removed by Filter: 197
+                                 Buffers: shared hit=3
+                           ->  Index Scan using idx_res_hotel_checkin on reservation r  (cost=0.42..20.51 rows=1 width=23) (actual time=0.055..0.068 rows=2 loops=1)
+                                 Index Cond: ((hotel_id = h.hotel_id) AND (check_in_date = '2026-11-12'::date))
+                                 Filter: ((res_status)::text = ANY ('{Confirmed,"Checked In"}'::text[]))
+                                 Buffers: shared hit=5
+                     ->  Index Scan using guest_pkey on guest g  (cost=0.42..7.97 rows=1 width=16) (actual time=0.031..0.031 rows=1 loops=2)
+                           Index Cond: (guest_id = r.guest_id)
+                           Buffers: shared hit=8
+               ->  Index Scan using room_type_room_type_id_hotel_id_key on room_type rt  (cost=0.28..0.61 rows=1 width=17) (actual time=0.007..0.008 rows=1 loops=2)
+                     Index Cond: (room_type_id = r.room_type_id)
+                     Buffers: shared hit=6
+         ->  Index Scan using bonvoy_account_guest_id_key on bonvoy_account ba  (cost=0.29..0.34 rows=1 width=13) (actual time=0.010..0.010 rows=0 loops=2)
+               Index Cond: (guest_id = g.guest_id)
+               Buffers: shared hit=5
+ Planning:
+   Buffers: shared hit=103
+ Planning Time: 2.975 ms
+ Execution Time: 0.411 ms
+(33 rows)
+
+=== Q5 Top 10 Bonvoy members by points earned in the last 12 months ===
+                                                                                            QUERY PLAN                                                                                             
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Subquery Scan on ranked  (cost=57465.31..62393.51 rows=151637 width=67) (actual time=847.699..847.731 rows=10 loops=1)
+   Buffers: shared hit=4272, temp read=1592 written=2195
+   ->  WindowAgg  (cost=57465.31..60877.14 rows=151637 width=79) (actual time=847.696..847.723 rows=10 loops=1)
+         Run Condition: (rank() OVER (?) <= 10)
+         Buffers: shared hit=4272, temp read=1592 written=2195
+         ->  Sort  (cost=57465.31..57844.40 rows=151637 width=39) (actual time=847.671..847.685 rows=11 loops=1)
+               Sort Key: (sum(pt.points)) DESC
+               Sort Method: external merge  Disk: 4680kB
+               Buffers: shared hit=4272, temp read=1592 written=2195
+               ->  HashAggregate  (cost=36383.55..40269.25 rows=151637 width=39) (actual time=622.138..733.260 rows=85464 loops=1)
+                     Group Key: ba.member_number, g.first_name, g.last_name, ba.elite_tier
+                     Planned Partitions: 4  Batches: 5  Memory Usage: 8241kB  Disk Usage: 3704kB
+                     Buffers: shared hit=4269, temp read=1257 written=1608
+                     ->  Hash Join  (cost=11433.39..21978.03 rows=151637 width=35) (actual time=197.571..498.649 rows=148893 loops=1)
+                           Hash Cond: (ba.account_id = pt.account_id)
+                           Buffers: shared hit=4269, temp read=840 written=840
+                           ->  Hash Join  (cost=4543.86..12521.02 rows=120127 width=35) (actual time=122.620..304.472 rows=120127 loops=1)
+                                 Hash Cond: (g.guest_id = ba.guest_id)
+                                 Buffers: shared hit=3695, temp read=840 written=840
+                                 ->  Seq Scan on guest g  (cost=0.00..4676.12 rows=200012 width=16) (actual time=0.022..37.672 rows=200012 loops=1)
+                                       Buffers: shared hit=2676
+                                 ->  Hash  (cost=2220.27..2220.27 rows=120127 width=27) (actual time=119.537..119.539 rows=120127 loops=1)
+                                       Buckets: 131072  Batches: 2  Memory Usage: 4670kB
+                                       Buffers: shared hit=1019, temp written=369
+                                       ->  Seq Scan on bonvoy_account ba  (cost=0.00..2220.27 rows=120127 width=27) (actual time=0.167..38.761 rows=120127 loops=1)
+                                             Buffers: shared hit=1019
+                           ->  Hash  (cost=4994.07..4994.07 rows=151637 width=8) (actual time=73.711..73.713 rows=148893 loops=1)
+                                 Buckets: 262144  Batches: 1  Memory Usage: 7865kB
+                                 Buffers: shared hit=574
+                                 ->  Index Only Scan using idx_points_earn_date on points_transaction pt  (cost=0.42..4994.07 rows=151637 width=8) (actual time=0.059..23.137 rows=148893 loops=1)
+                                       Index Cond: (created_at >= '2025-11-12 00:00:00+00'::timestamp with time zone)
+                                       Heap Fetches: 0
+                                       Buffers: shared hit=574
+ Planning:
+   Buffers: shared hit=155
+ Planning Time: 2.772 ms
+ Execution Time: 852.332 ms
+(37 rows)
+
+=== Q5b Same top 10, rewritten: total per account, keep the top 10, then join names ===
+                                                                                              QUERY PLAN                                                                                              
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=8452.32..8452.34 rows=10 width=67) (actual time=344.165..344.172 rows=10 loops=1)
+   Sort Key: (rank() OVER (?))
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=644, temp read=304 written=329
+   ->  WindowAgg  (cost=8363.99..8452.15 rows=10 width=67) (actual time=343.982..344.152 rows=10 loops=1)
+         Buffers: shared hit=644, temp read=304 written=329
+         ->  Nested Loop  (cost=8363.99..8451.95 rows=10 width=39) (actual time=343.963..344.117 rows=10 loops=1)
+               Buffers: shared hit=644, temp read=304 written=329
+               ->  Nested Loop  (cost=8363.57..8446.50 rows=10 width=31) (actual time=343.943..344.029 rows=10 loops=1)
+                     Buffers: shared hit=604, temp read=304 written=329
+                     ->  Limit  (cost=8363.27..8363.30 rows=10 width=12) (actual time=343.879..343.889 rows=10 loops=1)
+                           Buffers: shared hit=574, temp read=304 written=329
+                           ->  Sort  (cost=8363.27..8569.78 rows=82602 width=12) (actual time=343.875..343.881 rows=11 loops=1)
+                                 Sort Key: (sum(points_transaction.points)) DESC
+                                 Sort Method: external merge  Disk: 2184kB
+                                 Buffers: shared hit=574, temp read=304 written=329
+                                 ->  HashAggregate  (cost=5752.25..6578.27 rows=82602 width=12) (actual time=174.072..248.090 rows=85464 loops=1)
+                                       Group Key: points_transaction.account_id
+                                       Batches: 5  Memory Usage: 8241kB  Disk Usage: 256kB
+                                       Buffers: shared hit=574, temp read=31 written=55
+                                       ->  Index Only Scan using idx_points_earn_date on points_transaction  (cost=0.42..4994.07 rows=151637 width=8) (actual time=0.040..39.771 rows=148893 loops=1)
+                                             Index Cond: (created_at >= '2025-11-12 00:00:00+00'::timestamp with time zone)
+                                             Heap Fetches: 0
+                                             Buffers: shared hit=574
+                     ->  Index Scan using bonvoy_account_pkey on bonvoy_account ba  (cost=0.29..8.31 rows=1 width=27) (actual time=0.011..0.012 rows=1 loops=10)
+                           Index Cond: (account_id = points_transaction.account_id)
+                           Buffers: shared hit=30
+               ->  Index Scan using guest_pkey on guest g  (cost=0.42..0.54 rows=1 width=16) (actual time=0.008..0.008 rows=1 loops=10)
+                     Index Cond: (guest_id = ba.guest_id)
+                     Buffers: shared hit=40
+ Planning:
+   Buffers: shared hit=20
+ Planning Time: 0.748 ms
+ Execution Time: 345.901 ms
+(34 rows)
+
