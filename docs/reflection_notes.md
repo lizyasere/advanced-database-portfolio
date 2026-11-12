@@ -91,3 +91,44 @@ were coming, and it switched to a much cheaper plan. That took Q5 from about 567
 * Q1 showed 10 bookings for 8 rooms, because my generator never checked availability. That is
   the same thing that happens when two real booking requests check at the same moment, which is
   what Portfolio 3 is about.
+
+## Portfolio 3: Transactions and concurrency
+
+**Design choices.** I wanted to show concurrency problems actually happening, not just describe
+them. A single psql window cannot do that, because one session cannot race against itself. I
+wrote a small Python runner that starts two database sessions a fraction of a second apart and
+prints one combined timeline. A two second `pg_sleep` stands in for a guest typing their card
+details, which gives the second session time to slip in. I kept the story to one hotel and one
+night that matters: the last Executive Suite at Lagos Marriott Ikeja for Christmas.
+
+For durability I could have just restarted the database, but a clean restart writes everything
+to disk first, so it would not prove much. Killing the container with SIGKILL is closer to a
+power cut.
+
+**Challenges.** The scripts needed to make a decision half way through ("if a suite is free,
+book it, otherwise refuse"). I used psql's `\gset` to store the availability count in a variable
+and `\if` to branch on it, which I had not used before.
+
+My demo data also needed to start from the same point every time, otherwise the second run of a
+scenario would find the suite already taken by the first run. I wrote a reset script that the
+runner calls before every scenario. I first put the wrong base rate in it (572,000 instead of
+573,500), which I only noticed when I checked the real value in the table.
+
+**What I learned.**
+* REPEATABLE READ did not stop the overbooking. Each session inserted a different row, so there
+  was nothing for the database to see as a conflict. This is write skew, and it showed me that
+  a "stricter" isolation level is not automatically safe. You have to know which anomaly each
+  level prevents.
+* The lost update was the most worrying result because there was no error at all. Ifeoma just
+  ended up 1,000 points short, and the balance no longer matched her transactions. If I had not
+  compared the two, I would never have known.
+* Letting the database do the arithmetic (`points_balance = points_balance + 2500`) fixed the
+  lost update with one small change, without needing a stricter isolation level.
+* PostgreSQL found the deadlock by itself after about one second and cancelled one transfer, so
+  the data stayed correct. But the user still gets an error, so the real fix is to always lock
+  rows in the same order.
+* The crash test made the write-ahead log real for me. The booking was committed after the last
+  checkpoint, so it only existed in the WAL when I killed the database, and the recovery log
+  showed it being replayed.
+* Every fix has a cost. Locking makes people queue and SERIALIZABLE needs retries. For hotel
+  rooms I think queuing is the right price, because the alternative is a guest with no room.
