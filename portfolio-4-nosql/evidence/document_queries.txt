@@ -1,0 +1,83 @@
+
+=== 1. Guest profile screen: profile, Bonvoy account and recent bookings in one read ===
+{
+  _id: 63464,
+  name: {
+    first: 'Layla',
+    last: 'Chen'
+  },
+  email: 'Layla.Chen63452@example.net',
+  phone: '+2347290249327',
+  nationality: 'NG',
+  date_of_birth: ISODate('1991-08-08T00:00:00.000Z'),
+  created_at: ISODate('2023-10-21T12:44:11.000Z'),
+  bonvoy: {
+    member_number: '200063464',
+    tier: 'Silver Elite',
+    points_balance: 86598,
+    enrolled_on: ISODate('2023-10-21T00:00:00.000Z')
+  },
+  recent_bookings: [
+    {
+      confirmation_no: '90654574',
+      hotel: 'LOSSI',
+      hotel_name: 'Sheraton Lagos Hotel',
+      check_in: ISODate('2027-05-09T00:00:00.000Z'),
+      nights: 2,
+      status: 'Confirmed'
+    },
+    {
+      confirmation_no: '90037570',
+      hotel: 'QAAHH',
+      hotel_name: 'JW Marriott Toronto North',
+      check_in: ISODate('2027-03-14T00:00:00.000Z'),
+      nights: 5,
+      status: 'Confirmed'
+    },
+    {
+      confirmation_no: '90733120',
+      hotel: 'LOSSI',
+      hotel_name: 'Sheraton Lagos Hotel',
+      check_in: ISODate('2026-12-25T00:00:00.000Z'),
+      nights: 2,
+      status: 'Confirmed'
+    }
+  ]
+}
+plan: FETCH <- IXSCAN(email_1) | keys examined 1, docs examined 1, returned 1, 0 ms
+
+=== 2. Full booking history for the same guest, newest first ===
+  90654574  2027-05-09  2 nights  Confirmed    Sheraton Lagos Hotel
+  90037570  2027-03-14  5 nights  Confirmed    JW Marriott Toronto North
+  90733120  2026-12-25  2 nights  Confirmed    Sheraton Lagos Hotel
+  90236115  2026-12-13  3 nights  Confirmed    Marriott Hotels Dubai Downtown
+  90485359  2026-08-10  3 nights  Checked Out  Marriott Hotels Abu Dhabi Downtown
+  ...
+plan: FETCH <- IXSCAN(guest.id_1_check_in_-1) | keys examined 17, docs examined 17, returned 17, 1 ms
+
+=== 3. Flexible schema: hotels in Lagos, each brand has different features ===
+  LOSFP  Select        {"backup_power":"24 hour generator and inverter","airport_shuttle":true,"grab_and_go_market":true}
+  LOSMC  Premium       {"club_lounge":true,"backup_power":"24 hour generator and inverter","meeting_rooms":7,"airport_shuttle":true}
+  LOSSI  Premium       {"club_lounge":true,"backup_power":"24 hour generator and inverter","meeting_rooms":6,"airport_shuttle":true}
+  QAACW  Premium       {"club_lounge":true,"backup_power":"24 hour generator and inverter","meeting_rooms":5,"airport_shuttle":true}
+  QAACX  Extended Stay {"backup_power":"24 hour generator and inverter","pet_friendly":false,"weekly_rates":true,"airport_shuttle":true,"kitchen_in_room":true}
+  QAACY  Premium       {"club_lounge":true,"backup_power":"24 hour generator and inverter","meeting_rooms":7,"airport_shuttle":true}
+hotels with a spa: 48, hotels with weekly rates: 24, hotels with backup power: 25
+
+=== 4. Room nights sold by brand in the last 12 months (aggregation pipeline) ===
+  Marriott Hotels     35730 stays    106897 room nights
+  Sheraton            32116 stays     96722 room nights
+  JW Marriott         31919 stays     95909 room nights
+  Four Points         31807 stays     94601 room nights
+  Westin              30817 stays     92169 room nights
+  Courtyard           30508 stays     91402 room nights
+  Residence Inn       30367 stays     90972 room nights
+  The Ritz-Carlton    29505 stays     88283 room nights
+
+=== 5. Adding a payment touches only one document, so it is atomic on its own ===
+booking 90654574 payments before: 0
+booking 90654574 payments after:  1
+
+=== 6. Validation rules still apply ===
+rejected: nights, status broke the rules
+accepted: P4NEW1 with a new field (special_requests) that no other booking has
