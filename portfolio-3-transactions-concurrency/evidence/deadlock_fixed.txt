@@ -1,0 +1,28 @@
+Scenario: deadlock_fixed  (Same transfers, both accounts locked in a fixed order)
+Session B starts 0.3s after session A
+
+  0.24s  A | SET
+  0.24s  A | BEGIN
+  0.24s  A | [A] locking both accounts in member number order...
+  0.25s  A | [A] got both locks, taking 5000 points from 300000001
+  0.25s  A | UPDATE 1
+  0.59s                                                B | SET
+  0.59s                                                B | BEGIN
+  0.59s                                                B | [B] locking both accounts in member number order...
+  1.32s  A | [A] giving 5000 points to 300000002
+  1.32s  A | UPDATE 1
+  1.32s  A | [A] committing...
+  1.33s                                                B | [B] got both locks, taking 3000 points from 300000002
+  1.33s  A | COMMIT
+  1.34s                                                B | UPDATE 1
+  2.40s                                                B | [B] giving 3000 points to 300000001
+  2.40s                                                B | UPDATE 1
+  2.40s                                                B | [B] committing...
+  2.41s                                                B | COMMIT
+
+Result after both sessions finished:
+ member_number | points_balance 
+---------------+----------------
+ 300000001     |          48000
+ 300000002     |          22000
+(2 rows)

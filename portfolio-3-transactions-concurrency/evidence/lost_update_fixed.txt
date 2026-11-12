@@ -1,0 +1,25 @@
+Scenario: lost_update_fixed  (Two points updates on one balance, atomic UPDATE)
+Session B starts 0.5s after session A
+
+  0.25s  A | SET
+  0.25s  A | BEGIN
+  0.25s  A | [A] adding 1000
+  0.25s  A | UPDATE 1
+  0.25s  A | [A] balance is now 51000 (other session must wait for this row until I commit)
+  0.91s                                                B | SET
+  0.91s                                                B | BEGIN
+  0.91s                                                B | [B] adding 2500
+  2.39s  A | INSERT 0 1
+  2.39s  A | [A] committing...
+  2.39s  A | COMMIT
+  2.39s                                                B | UPDATE 1
+  2.39s                                                B | [B] balance is now 53500 (other session must wait for this row until I commit)
+  4.53s                                                B | INSERT 0 1
+  4.53s                                                B | [B] committing...
+  4.53s                                                B | COMMIT
+
+Result after both sessions finished:
+ final_balance | start_plus_transactions 
+---------------+-------------------------
+         53500 |                   53500
+(1 row)

@@ -1,0 +1,23 @@
+Scenario: lost_update_rr  (Two points updates on one balance, read then write, REPEATABLE READ)
+Session B starts 0.5s after session A
+
+  0.16s  A | SET
+  0.16s  A | BEGIN
+  0.16s  A | [A] read balance: 50000, adding 1000
+  0.72s                                                B | SET
+  0.72s                                                B | BEGIN
+  0.72s                                                B | [B] read balance: 50000, adding 2500
+  2.29s  A | UPDATE 1
+  2.29s  A | INSERT 0 1
+  2.29s  A | [A] committing...
+  2.29s  A | COMMIT
+  2.85s                                                B | psql:/scripts/p3/earn_points_unsafe.sql:9: ERROR:  could not serialize access due to concurrent update
+  2.85s                                                B | psql:/scripts/p3/earn_points_unsafe.sql:10: ERROR:  current transaction is aborted, commands ignored until end of transaction block
+  2.85s                                                B | [B] committing...
+  2.85s                                                B | ROLLBACK
+
+Result after both sessions finished:
+ final_balance | start_plus_transactions 
+---------------+-------------------------
+         51000 |                   51000
+(1 row)

@@ -1,0 +1,34 @@
+Scenario: overbook_rc  (Last suite, naive booking, READ COMMITTED)
+Session B starts 0.5s after session A
+
+  0.18s  A | SET
+  0.18s  A | BEGIN
+  0.18s  A | [A] checking availability...
+  0.19s  A | [A] suites free: 1
+  0.19s  A | [A] guest is paying...
+  0.65s                                                B | SET
+  0.65s                                                B | BEGIN
+  0.65s                                                B | [B] checking availability...
+  0.66s                                                B | [B] suites free: 1
+  0.66s                                                B | [B] guest is paying...
+  2.42s  A | INSERT 0 1
+  2.42s  A | [A] committing...
+  2.42s  A | COMMIT
+  2.81s                                                B | INSERT 0 1
+  2.81s                                                B | [B] committing...
+  2.81s                                                B | COMMIT
+
+Result after both sessions finished:
+ confirmation_no |     guest     
+-----------------+---------------
+ P3A0001         | Ifeoma Chukwu
+ P3B0001         | Daniel Okoro
+ P3PRE1          | Adaeze Okafor
+ P3PRE2          | Adaeze Okafor
+ P3PRE3          | Adaeze Okafor
+(5 rows)
+
+ suites_booked_for_christmas | suites_in_hotel 
+-----------------------------+-----------------
+                           5 |               4
+(1 row)

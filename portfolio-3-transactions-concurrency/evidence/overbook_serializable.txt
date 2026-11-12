@@ -1,0 +1,35 @@
+Scenario: overbook_serializable  (Last suite, naive booking, SERIALIZABLE)
+Session B starts 0.5s after session A
+
+  0.29s  A | SET
+  0.30s  A | BEGIN
+  0.30s  A | [A] checking availability...
+  0.30s  A | [A] suites free: 1
+  0.30s  A | [A] guest is paying...
+  0.70s                                                B | SET
+  0.71s                                                B | BEGIN
+  0.71s                                                B | [B] checking availability...
+  0.71s                                                B | [B] suites free: 1
+  0.71s                                                B | [B] guest is paying...
+  2.43s  A | INSERT 0 1
+  2.43s  A | [A] committing...
+  2.43s  A | COMMIT
+  2.84s                                                B | psql:/scripts/p3/book_suite_unsafe.sql:26: ERROR:  could not serialize access due to read/write dependencies among transactions
+  2.84s                                                B | DETAIL:  Reason code: Canceled on identification as a pivot, during write.
+  2.84s                                                B | HINT:  The transaction might succeed if retried.
+  2.84s                                                B | [B] committing...
+  2.84s                                                B | ROLLBACK
+
+Result after both sessions finished:
+ confirmation_no |     guest     
+-----------------+---------------
+ P3A0001         | Ifeoma Chukwu
+ P3PRE1          | Adaeze Okafor
+ P3PRE2          | Adaeze Okafor
+ P3PRE3          | Adaeze Okafor
+(4 rows)
+
+ suites_booked_for_christmas | suites_in_hotel 
+-----------------------------+-----------------
+                           4 |               4
+(1 row)

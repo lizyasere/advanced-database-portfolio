@@ -1,0 +1,12 @@
+Scenario: nonrepeatable_rc  (Report reads the suite rate twice while it changes, READ COMMITTED)
+Session B starts 0.7s after session A
+
+  0.23s  A | SET
+  0.23s  A | BEGIN
+  0.24s  A | [A] first read of suite rate: 573500.00
+  0.98s                                                B | SET
+  0.98s                                                B | [B] raising the suite rate to 650000
+  0.98s                                                B | UPDATE 1
+  0.98s                                                B | [B] committed (autocommit)
+  2.36s  A | [A] second read of suite rate: 650000.00
+  2.36s  A | COMMIT

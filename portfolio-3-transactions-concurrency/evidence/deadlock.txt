@@ -1,0 +1,30 @@
+Scenario: deadlock  (Two members transfer points to each other at the same time)
+Session B starts 0.3s after session A
+
+  0.17s  A | SET
+  0.17s  A | BEGIN
+  0.17s  A | [A] taking 5000 points from 300000001
+  0.17s  A | UPDATE 1
+  0.58s                                                B | SET
+  0.58s                                                B | BEGIN
+  0.58s                                                B | [B] taking 3000 points from 300000002
+  0.58s                                                B | UPDATE 1
+  1.23s  A | [A] giving 5000 points to 300000002
+  1.63s                                                B | [B] giving 3000 points to 300000001
+  2.32s                                                B | UPDATE 1
+  2.32s                                                B | [B] committing...
+  2.32s  A | psql:/scripts/p3/transfer_points.sql:11: ERROR:  deadlock detected
+  2.32s  A | DETAIL:  Process 1571 waits for ShareLock on transaction 1281; blocked by process 1579.
+  2.32s  A | Process 1579 waits for ShareLock on transaction 1280; blocked by process 1571.
+  2.32s  A | HINT:  See server log for query details.
+  2.32s  A | CONTEXT:  while updating tuple (1018,40) in relation "bonvoy_account"
+  2.32s  A | [A] committing...
+  2.32s  A | ROLLBACK
+  2.34s                                                B | COMMIT
+
+Result after both sessions finished:
+ member_number | points_balance 
+---------------+----------------
+ 300000001     |          53000
+ 300000002     |          17000
+(2 rows)

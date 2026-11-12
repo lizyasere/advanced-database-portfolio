@@ -1,0 +1,33 @@
+Scenario: overbook_locking  (Last suite, booking with SELECT ... FOR UPDATE)
+Session B starts 0.5s after session A
+
+  0.20s  A | SET
+  0.20s  A | BEGIN
+  0.20s  A | [A] locking the Executive Suite inventory...
+  0.20s  A | [A] got the lock, checking availability...
+  0.21s  A | [A] suites free: 1
+  0.21s  A | [A] guest is paying...
+  0.75s                                                B | SET
+  0.75s                                                B | BEGIN
+  0.75s                                                B | [B] locking the Executive Suite inventory...
+  2.33s  A | INSERT 0 1
+  2.33s  A | [A] committing...
+  2.33s                                                B | [B] got the lock, checking availability...
+  2.33s  A | COMMIT
+  2.34s                                                B | [B] suites free: 0
+  2.34s                                                B | [B] sold out, booking refused
+  2.34s                                                B | ROLLBACK
+
+Result after both sessions finished:
+ confirmation_no |     guest     
+-----------------+---------------
+ P3A0001         | Ifeoma Chukwu
+ P3PRE1          | Adaeze Okafor
+ P3PRE2          | Adaeze Okafor
+ P3PRE3          | Adaeze Okafor
+(4 rows)
+
+ suites_booked_for_christmas | suites_in_hotel 
+-----------------------------+-----------------
+                           4 |               4
+(1 row)

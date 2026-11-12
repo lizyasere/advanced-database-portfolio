@@ -1,0 +1,23 @@
+Scenario: lost_update_rc  (Two points updates on one balance, read then write, READ COMMITTED)
+Session B starts 0.5s after session A
+
+  0.25s  A | SET
+  0.25s  A | BEGIN
+  0.25s  A | [A] read balance: 50000, adding 1000
+  0.80s                                                B | SET
+  0.80s                                                B | BEGIN
+  0.80s                                                B | [B] read balance: 50000, adding 2500
+  2.39s  A | UPDATE 1
+  2.43s  A | INSERT 0 1
+  2.43s  A | [A] committing...
+  2.44s  A | COMMIT
+  3.14s                                                B | UPDATE 1
+  3.14s                                                B | INSERT 0 1
+  3.14s                                                B | [B] committing...
+  3.14s                                                B | COMMIT
+
+Result after both sessions finished:
+ final_balance | start_plus_transactions 
+---------------+-------------------------
+         52500 |                   53500
+(1 row)
