@@ -45,6 +45,11 @@ Q3 and Q5 each have two versions (a and b) because I rewrote them as part of the
 
 ## 4. Method
 
+PostgreSQL uses cost-based optimisation, as covered in Study Session Four. It works out several
+possible plans for each query, estimates their cost from its statistics about the tables, and
+runs the cheapest one. That is why I ran `ANALYZE` after loading the data and again after
+creating the indexes, so the statistics were up to date.
+
 1. Run the queries once to warm the cache, so every measured run starts with the data in memory.
 2. Run each query 5 times with `EXPLAIN (ANALYZE, BUFFERS)` and take the **median** execution
    time ([`benchmark.py`](benchmark.py)). I added this after noticing a single run could vary a
@@ -119,7 +124,8 @@ Q3a filters with `EXTRACT(YEAR FROM check_in_date) = 2026`. Q3b uses
 
 Wrapping the column in a function hides it from PostgreSQL's statistics, so it guessed 50 times
 too low. Bad estimates lead to bad plan choices, such as picking a nested loop that would be
-very slow for 73,000 rows.
+very slow for 73,000 rows. This is the "estimated vs actual cost" problem from Study Session
+Four: when the two are far apart, the optimiser is working from poor information.
 
 **Fix:** a composite **covering** index:
 ```sql
@@ -144,7 +150,8 @@ for Q3, which asks for one hotel over a whole year.
 
 **Before:** 567 ms. The plan showed `Sort Method: external merge Disk: 4680kB` twice. The
 query grouped about 85,000 members by number, name and tier, and sorted them on disk, only to
-keep 10.
+keep 10. Sorting needs memory, and when there isn't enough the database spills to temporary
+files on disk, which adds I/O cost (one of the memory cost factors in Study Session Four).
 
 I first tried an index (`idx_points_earn_date`, covering, partial on `txn_type = 'Earn'`).
 PostgreSQL did use it (`Index Only Scan`), but the time did not improve, because a third of
@@ -161,6 +168,11 @@ planner expected 83,000 rows out of the ranking, so it hashed the whole guest ta
 join. `FETCH FIRST ... WITH TIES` tells the planner only about 10 rows come out, so it switched
 to a `Nested Loop` with index lookups. Q5b gives exactly the same top 10 as Q5 and is about
 3.5 times faster, with or without the index.
+
+Another option would be a materialised view. A loyalty leaderboard does not need to be up to the
+second, so the top 10 could be worked out once a night and stored, making the query almost
+instant. I did not build this, but it would be my next step if the loyalty team needed this
+report on a busy dashboard.
 
 ## 7. What the indexes cost
 
@@ -256,3 +268,8 @@ seconds because it ran straight after the indexes were rebuilt. The median over 
 
 The timing tables are in [`evidence/timings_before.md`](evidence/timings_before.md) and
 [`evidence/timings_after.md`](evidence/timings_after.md).
+
+## References
+
+- MIVA Open University (2025) *MIT 8103 Advanced Database Systems*. Course material, Study Session Four (query optimisation, execution plans and cost estimation).
+- PostgreSQL Global Development Group (2024) *PostgreSQL 16 Documentation: Using EXPLAIN*. Available at: https://www.postgresql.org/docs/16/using-explain.html

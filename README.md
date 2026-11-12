@@ -72,4 +72,5 @@ uses 5432.
 - Business Traveller (2020) *Marriott International fined £18.4 million for data breach*. Available at: https://www.businesstraveller.com/business-travel/2020/11/02/marriott-international-fined-18-4-million-for-data-breach/
 - Marriott International (2026) *Marriott International Reports Fourth Quarter and Full Year 2025 Results*. Available at: https://marriott.gcs-web.com/news-releases/news-release-details/marriott-international-reports-fourth-quarter-and-full-year-2025
 - Marriott International (n.d.) *Hotels in Nigeria*. Available at: https://www.marriott.com/en/destinations/nigeria.mi
+- MIVA Open University (2025) *MIT 8103 Advanced Database Systems*. Course material, Study Sessions One to Six.
 - Reed, J. (2015) *Why Marriott is transforming their legacy systems with NoSQL*. diginomica. Available at: https://diginomica.com/why-marriott-is-transforming-their-legacy-systems-with-nosql

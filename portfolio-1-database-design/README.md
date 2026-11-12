@@ -24,6 +24,10 @@ New York. The guests, bookings and prices are made up.
 
 ## 2. ER diagram
 
+I followed the design stages from Study Session One in order: requirements (the case study
+above), conceptual design (this ER diagram), logical design (the relational schema in section 3),
+physical design (the SQL in `01_schema.sql`) and then testing (section 7).
+
 ![ER diagram](er_diagram.png)
 
 The source is in [`er_diagram.mmd`](er_diagram.mmd) (Mermaid format, which GitHub also draws on screen).
@@ -110,7 +114,8 @@ and the UK Information Commissioner's Office fined Marriott £18.4 million. Two 
 schema come from that case:
 
 1. **No passport numbers are stored.** The central reservation system does not need them, and
-   data you do not keep cannot be leaked.
+   data you do not keep cannot be leaked. This is the "privacy by design" idea from Study
+   Session Six: collect only what the system actually needs.
 2. **No full card numbers are stored,** only the last four digits, in line with the PCI DSS card
    security standard.
 
@@ -153,7 +158,9 @@ I checked each table this way and the final design is in BCNF.
 
 ### Columns that look redundant but are kept on purpose
 
-A good design also knows when a repeated value is actually a different fact:
+The course notes warn that normalising too far can make queries more complex, and that there
+has to be a balance between normalisation and performance. A good design also knows when a
+repeated value is actually a different fact:
 
 * **`reservation.nightly_rate`** looks like it could be worked out from `room_type.base_rate` and
   `rate_plan.discount_pct`. But base rates change all the time (revenue managers adjust them
@@ -228,3 +235,8 @@ Running the tests in my own terminal:
 
 ![Constraint tests 1 to 5](../screenshots/p1_constraint_tests_1.png)
 ![Constraint tests 6 to 10 and control test](../screenshots/p1_constraint_tests_2.png)
+
+## References
+
+- MIVA Open University (2025) *MIT 8103 Advanced Database Systems*. Course material, Study Session One (database design and normalisation) and Study Session Six (data privacy).
+- Business Traveller (2020) *Marriott International fined £18.4 million for data breach*. Available at: https://www.businesstraveller.com/business-travel/2020/11/02/marriott-international-fined-18-4-million-for-data-breach/
