@@ -1,0 +1,28 @@
+Step 1: commit a booking
+DELETE 0
+INSERT 0 1
+ confirmation_no |          booked_at           
+-----------------+------------------------------
+ P3DURABLE       | 2026-11-12 07:40:26.69719+00
+(1 row)
+
+Step 2: kill the database container immediately (SIGKILL, no clean shutdown)
+killed at 08:40:28
+
+Step 3: start it again
+database is accepting connections again
+
+Step 4: is the booking still there?
+ confirmation_no |          booked_at           
+-----------------+------------------------------
+ P3DURABLE       | 2026-11-12 07:40:26.69719+00
+(1 row)
+
+PostgreSQL startup log after the crash:
+  2026-11-12 07:40:04.822 UTC [62] LOG:  checkpoint complete: wrote 704 buffers (4.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=75.683 s, sync=0.014 s, total=75.750 s; sync files=37, longest=0.002 s, average=0.001 s; distance=166 kB, estimate=333204 kB; lsn=0/5DDDD9F8, redo lsn=0/5DDB9658
+  2026-11-12 07:40:34.022 UTC [34] LOG:  database system was interrupted; last known up at 2026-11-12 07:40:04 UTC
+  2026-11-12 07:40:34.661 UTC [34] LOG:  database system was not properly shut down; automatic recovery in progress
+  2026-11-12 07:40:34.744 UTC [34] LOG:  redo starts at 0/5DDB9658
+  2026-11-12 07:40:34.760 UTC [34] LOG:  redo done at 0/5DDE0D38 system usage: CPU: user: 0.01 s, system: 0.00 s, elapsed: 0.02 s
+  2026-11-12 07:40:34.823 UTC [32] LOG:  checkpoint complete: wrote 37 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.021 s, sync=0.015 s, total=0.055 s; sync files=26, longest=0.003 s, average=0.001 s; distance=157 kB, estimate=157 kB; lsn=0/5DDE0D60, redo lsn=0/5DDE0D60
+  2026-11-12 07:40:34.839 UTC [1] LOG:  database system is ready to accept connections
