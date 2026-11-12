@@ -1,0 +1,98 @@
+SET
+INSERT 0 0
+INSERT 0 0
+DELETE 0
+DELETE 0
+DELETE 3
+UPDATE 1
+UPDATE 1
+UPDATE 1
+INSERT 0 3
+SET
+
+=== 1. Award booking that succeeds (COMMIT) ===
+Ifeoma has 50,000 points. 3 nights at Four Points Lagos cost 36,000 points.
+ member_number | points_balance 
+---------------+----------------
+ 300000001     |          50000
+(1 row)
+
+BEGIN
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+COMMIT
+ member_number | points_balance 
+---------------+----------------
+ 300000001     |          14000
+(1 row)
+
+ confirmation_no | res_status 
+-----------------+------------
+ P3AWARD1        | Confirmed
+(1 row)
+
+
+=== 2. Award booking that fails part way (automatic ROLLBACK) ===
+Daniel has only 20,000 points but tries the same 36,000 point stay.
+The booking and the points record insert fine, then the balance update breaks
+the CHECK (points_balance >= 0) rule, so the whole transaction is cancelled.
+ member_number | points_balance 
+---------------+----------------
+ 300000002     |          20000
+(1 row)
+
+BEGIN
+INSERT 0 1
+INSERT 0 1
+psql:/scripts/p3/01_acid_basics.sql:52: ERROR:  new row for relation "bonvoy_account" violates check constraint "bonvoy_account_points_balance_check"
+DETAIL:  Failing row contains (120129, 200015, 300000002, Gold Elite, -16000, 2026-11-12).
+ROLLBACK
+After the failed transaction: no booking, no points record, balance unchanged
+ bookings_named_p3award2 
+-------------------------
+                       0
+(1 row)
+
+ points_records_for_daniel 
+---------------------------
+                         0
+(1 row)
+
+ member_number | points_balance 
+---------------+----------------
+ 300000002     |          20000
+(1 row)
+
+
+=== 3. Guest closes the app before paying (explicit ROLLBACK) ===
+BEGIN
+INSERT 0 1
+ confirmation_no | res_status 
+-----------------+------------
+ P3ABANDON       | Confirmed
+(1 row)
+
+ROLLBACK
+ bookings_named_p3abandon 
+--------------------------
+                        0
+(1 row)
+
+
+=== 4. Savepoint: keep the booking, undo only the bad payment ===
+The booking is saved, then a card payment is entered without the card digits.
+Rolling back to the savepoint removes only the bad payment; a correct one is added.
+BEGIN
+INSERT 0 1
+SAVEPOINT
+psql:/scripts/p3/01_acid_basics.sql:87: ERROR:  new row for relation "payment" violates check constraint "payment_check"
+DETAIL:  Failing row contains (716978, 1450065, 460000.00, NGN, Card, null, Captured, 2026-11-12 07:40:00.357939+00).
+ROLLBACK
+INSERT 0 1
+COMMIT
+ confirmation_no |  amount   | pay_method | card_last4 
+-----------------+-----------+------------+------------
+ P3SAVE1         | 460000.00 | Card       | 4417
+(1 row)
+
