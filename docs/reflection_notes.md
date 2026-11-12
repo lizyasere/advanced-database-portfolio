@@ -114,6 +114,13 @@ scenario would find the suite already taken by the first run. I wrote a reset sc
 runner calls before every scenario. I first put the wrong base rate in it (572,000 instead of
 573,500), which I only noticed when I checked the real value in the table.
 
+When I took the screenshot of the crash test, the times looked wrong: converted to the same time
+zone, the container was "killed" one second before the booking was committed. The kill time came
+from my laptop's clock and the booking time from the database inside Docker, and the two clocks
+were about a second apart. I changed the script to read the time from the database just before
+the kill, so both times come from the same clock. It taught me to be careful when comparing
+timestamps from different machines, which matters even more in a distributed database.
+
 **What I learned.**
 * REPEATABLE READ did not stop the overbooking. Each session inserted a different row, so there
   was nothing for the database to see as a conflict. This is write skew, and it showed me that
