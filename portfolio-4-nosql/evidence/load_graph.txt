@@ -1,0 +1,13 @@
+Loaded in 93 seconds
+
+node, how_many
+"Guest", 200014
+"Hotel", 198
+"City", 33
+"Country", 21
+"Brand", 8
+relationship, how_many
+"STAYED_AT", 721238
+"PART_OF", 198
+"LOCATED_IN", 198
+"IN_COUNTRY", 33
