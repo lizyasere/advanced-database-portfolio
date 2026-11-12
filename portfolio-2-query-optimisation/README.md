@@ -222,3 +222,37 @@ docker exec marriott_postgres sh -c "psql -U mit8103 -d marriott_crs -f /scripts
 | `06_write_cost.sql` | Times 50,000 inserts, then rolls back |
 | `benchmark.py` | Runs `03_explain.sql` 5 times and records median times |
 | `evidence/` | All saved output |
+
+## 11. Screenshots
+
+These are single runs from my own terminal. Single runs vary (especially the first run after
+indexes are dropped or created, when the data is not yet cached), which is why the results
+table in section 5 uses the median of 5 runs instead.
+
+**Removing the Portfolio 2 indexes to get the "before" state**
+
+![Dropping indexes](../screenshots/p2_remove_indexes.png)
+
+**Before indexing:** `Parallel Seq Scan on reservation` and `Parallel Seq Scan on guest`, with
+hundreds of thousands of rows removed by the filter
+
+![Plans before indexing, Q1](../screenshots/p2_plans_before1.png)
+![Plans before indexing, Q2 and Q4](../screenshots/p2_plans_before2.png)
+
+**Creating the indexes**, with their sizes
+
+![Creating indexes](../screenshots/p2_create_indexes.png)
+
+**After indexing:** `Index Only Scan` with `Heap Fetches: 0` for Q1, and index scans for Q2 and Q4
+
+![Plans after indexing, Q1 and Q2](../screenshots/p2_plans_after1.png)
+![Plans after indexing, Q4](../screenshots/p2_plans_after2.png)
+
+**Insert cost test:** 50,000 bookings inserted, then rolled back. This single run took 7.4
+seconds because it ran straight after the indexes were rebuilt. The median over 4 runs was
+2.2 seconds (see section 7).
+
+![Write cost test](../screenshots/p2_write_cost.png)
+
+The timing tables are in [`evidence/timings_before.md`](evidence/timings_before.md) and
+[`evidence/timings_after.md`](evidence/timings_after.md).
