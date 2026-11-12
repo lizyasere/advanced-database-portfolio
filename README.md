@@ -66,12 +66,14 @@ Everything runs in Docker, so anyone can rebuild the same environment on their o
 |---|---|
 | PostgreSQL | 16.4 (image `postgres:16.4`, on host port 5433) |
 | MongoDB | 7.0.14 (image `mongo:7.0.14`, on host port 27017) |
+| Neo4j | 5.26.0 Community (image `neo4j:5.26.0-community`, browser on http://localhost:7474) |
 | Docker Engine and Compose | 29.6.1 and v5.1.4 |
 
 ```bash
-docker compose up -d                                              # start PostgreSQL and MongoDB
+docker compose up -d                                              # start PostgreSQL, MongoDB and Neo4j
 docker exec -it marriott_postgres psql -U mit8103 -d marriott_crs # open the SQL shell
 docker exec -it marriott_mongo mongosh                            # open the MongoDB shell
+docker exec -it marriott_neo4j cypher-shell -u neo4j -p mit8103_pass  # open the Neo4j shell
 ```
 
 PostgreSQL uses port 5433 instead of the usual 5432 because another project on my laptop already

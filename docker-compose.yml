@@ -22,16 +22,34 @@ services:
       - ./portfolio-1-database-design:/scripts/p1
       - ./portfolio-2-query-optimisation:/scripts/p2
       - ./portfolio-3-transactions-concurrency:/scripts/p3
+      - ./portfolio-4-nosql:/scripts/p4
 
   mongo:
     image: mongo:7.0.14
     container_name: marriott_mongo
+    command: ["--wiredTigerCacheSizeGB", "1"]
     ports:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
       - ./portfolio-4-nosql:/scripts/p4
 
+  neo4j:
+    image: neo4j:5.26.0-community
+    container_name: marriott_neo4j
+    environment:
+      NEO4J_AUTH: neo4j/mit8103_pass
+      NEO4J_server_memory_heap_max__size: 1G
+      NEO4J_server_memory_pagecache_size: 512M
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+      - ./portfolio-4-nosql/graph_import:/import
+      - ./portfolio-4-nosql:/scripts/p4
+
 volumes:
   pg_data:
   mongo_data:
+  neo4j_data:
