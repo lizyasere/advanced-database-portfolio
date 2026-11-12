@@ -26,9 +26,10 @@ def mongo(js):
     return out.stdout.strip()
 
 
-RESET = r'db.availability.updateMany({_id: /^LOSMC|EXSU|2027-12-2[456]/}, {$set: {sold: 3}});'
-STATE = (r'print(db.availability.find({_id: /^LOSMC|EXSU|2027-12-2[456]/}).sort({_id: 1}).toArray()'
-         r'.map(d => d._id.slice(-10) + " sold " + d.sold + " of " + d.total).join(", "))')
+KEYS = '{_id: {$in: ["LOSMC|EXSU|2027-12-24", "LOSMC|EXSU|2027-12-25", "LOSMC|EXSU|2027-12-26"]}}'
+RESET = f'db.availability.updateMany({KEYS}, {{$set: {{sold: 3}}}});'
+STATE = (f'print(db.availability.find({KEYS}).sort({{_id: 1}}).toArray()'
+         '.map(d => d._id.slice(-10) + " sold " + d.sold + " of " + d.total).join(", "))')
 
 for name, fn in [("read then write", "bookUnsafe"), ("atomic conditional update", "book")]:
     mongo(RESET)
