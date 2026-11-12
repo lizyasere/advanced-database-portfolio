@@ -47,6 +47,17 @@ I picked Marriott because its own technology story lines up well with the topics
 | `docs/` | Final documentation submitted on the LMS | Not started |
 | `screenshots/` | Screenshots used as evidence across all portfolios | |
 
+## Link to the course study sessions
+
+| Study session | Main topics | Where I applied it |
+|---|---|---|
+| One: Review of Traditional Relational Databases and Advanced Concepts | Design stages, characteristics of a good database, normalisation (1NF to BCNF) | Portfolio 1: followed the design stages from requirements to testing, normalised a flat booking sheet to BCNF, and kept two columns denormalised on purpose |
+| Two: Distributed Database System | Fragmentation, replication, consistency, CAP theorem, ACID vs BASE | Portfolio 3: tested all four ACID properties, including a crash test for durability. Portfolio 5: replication, sharding and the CAP trade-off for hotels in many countries |
+| Three: Big Data and Cloud Database Systems | Cloud databases and their uses, data warehouses, security | Portfolio 5: running the Marriott data on a cloud database service |
+| Four: Query Optimisation in Database | Cost-based optimisation, execution plans, cost estimation, indexing and file organisation | Portfolio 2: read execution plans, compared estimated and actual rows, added partial, expression and covering indexes, and measured their cost |
+| Five: Emerging Trends in Database Systems | Graph databases, serverless and edge databases | Portfolio 4: NoSQL models of the same Marriott data, including a graph view of guests, hotels and stays |
+| Six: Introduction to Data Security and Data Privacy | Privacy challenges, privacy by design | Portfolio 1: no passport numbers or full card numbers stored, based on the Starwood breach |
+
 ## Setup
 
 Everything runs in Docker, so anyone can rebuild the same environment on their own machine.
