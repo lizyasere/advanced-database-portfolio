@@ -353,7 +353,7 @@ docker exec marriott_neo4j cypher-shell -u neo4j -p mit8103_pass --format verbos
 python graph_compare.py
 ```
 
-The Neo4j browser is at http://localhost:7474 (user `neo4j`, password `mit8103_pass`).
+The Neo4j browser is at http://127.0.0.1:7474 (user `neo4j`, password `mit8103_pass`).
 
 ## References
 

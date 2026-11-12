@@ -66,7 +66,7 @@ Everything runs in Docker, so anyone can rebuild the same environment on their o
 |---|---|
 | PostgreSQL | 16.4 (image `postgres:16.4`, on host port 5433) |
 | MongoDB | 7.0.14 (image `mongo:7.0.14`, on host port 27017) |
-| Neo4j | 5.26.0 Community (image `neo4j:5.26.0-community`, browser on http://localhost:7474) |
+| Neo4j | 5.26.0 Community (image `neo4j:5.26.0-community`, browser on http://127.0.0.1:7474) |
 | Docker Engine and Compose | 29.6.1 and v5.1.4 |
 
 ```bash
