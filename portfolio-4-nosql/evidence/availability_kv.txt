@@ -1,0 +1,32 @@
+=== 1. Build the availability keys for Lagos Marriott Ikeja, 20 to 31 Dec 2027 ===
+36 keys created (3 room types x 12 nights)
+  LOSMC|EXSU|2027-12-23  total 4  sold 0  free 4
+  LOSMC|EXSU|2027-12-24  total 4  sold 3  free 1
+  LOSMC|EXSU|2027-12-25  total 4  sold 3  free 1
+  LOSMC|EXSU|2027-12-26  total 4  sold 3  free 1
+  LOSMC|EXSU|2027-12-27  total 4  sold 0  free 4
+
+=== 2. Availability check is a single key lookup ===
+plan: IDHACK | keys examined 1, docs examined 1
+
+=== 3. Book the last Executive Suite for 24 to 27 Dec (3 nights) ===
+{
+  ok: true,
+  nights: 3
+}
+
+=== 4. The next guest asks for the same nights ===
+{
+  ok: false,
+  full_night: 'LOSMC|EXSU|2027-12-24',
+  given_back: 0
+}
+
+=== 5. A stay of 22 to 26 Dec: the first two nights are free, the 24th is full ===
+before: 12-22 sold 0, 12-23 sold 0
+{
+  ok: false,
+  full_night: 'LOSMC|EXSU|2027-12-24',
+  given_back: 2
+}
+after:  12-22 sold 0, 12-23 sold 0  (nights given back)
