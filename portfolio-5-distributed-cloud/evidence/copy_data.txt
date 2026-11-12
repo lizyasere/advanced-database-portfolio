@@ -1,0 +1,5 @@
+Copied to the replica set rs0:
+hotels            198
+guests         200014
+availability       36
+reservations   180417

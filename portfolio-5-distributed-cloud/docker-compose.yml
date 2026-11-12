@@ -1,0 +1,70 @@
+# Portfolio 5: distributed MongoDB, kept separate from the main docker-compose.yml so it only
+# runs when needed. Each node gets a small cache (0.25 GB) so everything fits on a laptop.
+#
+#   docker compose --profile replica up -d     3-node replica set (rs0)
+#   docker compose --profile sharded up -d     config server, 2 shards and a mongos router
+#   docker compose --profile replica --profile sharded down -v     remove everything
+#
+# The replica set nodes start with enableTestCommands so that replication can be paused on
+# purpose in the consistency test. That setting is for testing only, never production.
+
+x-node: &node
+  image: mongo:7.0.14
+  networks: [p5net]
+
+services:
+  rs1:
+    <<: *node
+    container_name: p5_rs1
+    hostname: rs1
+    profiles: [replica]
+    command: ["--replSet", "rs0", "--bind_ip_all", "--wiredTigerCacheSizeGB", "0.25",
+              "--setParameter", "enableTestCommands=1"]
+    volumes: [".:/scripts/p5"]
+  rs2:
+    <<: *node
+    container_name: p5_rs2
+    hostname: rs2
+    profiles: [replica]
+    command: ["--replSet", "rs0", "--bind_ip_all", "--wiredTigerCacheSizeGB", "0.25",
+              "--setParameter", "enableTestCommands=1"]
+  rs3:
+    <<: *node
+    container_name: p5_rs3
+    hostname: rs3
+    profiles: [replica]
+    command: ["--replSet", "rs0", "--bind_ip_all", "--wiredTigerCacheSizeGB", "0.25",
+              "--setParameter", "enableTestCommands=1"]
+
+  cfg:
+    <<: *node
+    container_name: p5_cfg
+    hostname: cfg
+    profiles: [sharded]
+    command: ["--configsvr", "--replSet", "cfgrs", "--port", "27017", "--bind_ip_all",
+              "--wiredTigerCacheSizeGB", "0.25"]
+  shard_emea:
+    <<: *node
+    container_name: p5_shard_emea
+    hostname: shard_emea
+    profiles: [sharded]
+    command: ["--shardsvr", "--replSet", "emea", "--port", "27017", "--bind_ip_all",
+              "--wiredTigerCacheSizeGB", "0.25"]
+  shard_amer:
+    <<: *node
+    container_name: p5_shard_amer
+    hostname: shard_amer
+    profiles: [sharded]
+    command: ["--shardsvr", "--replSet", "amer", "--port", "27017", "--bind_ip_all",
+              "--wiredTigerCacheSizeGB", "0.25"]
+  mongos:
+    <<: *node
+    container_name: p5_mongos
+    hostname: mongos
+    profiles: [sharded]
+    entrypoint: ["mongos", "--configdb", "cfgrs/cfg:27017", "--bind_ip_all"]
+    depends_on: [cfg, shard_emea, shard_amer]
+    volumes: [".:/scripts/p5"]
+
+networks:
+  p5net:
