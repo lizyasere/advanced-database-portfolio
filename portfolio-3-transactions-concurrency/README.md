@@ -60,21 +60,29 @@ and a points record but still have his 20,000 points.
 I committed a booking, then killed the database container with `SIGKILL`, which is like pulling
 the power cable: no clean shutdown. After starting it again, the booking was still there.
 
-The PostgreSQL log shows why:
+The timeline, all in UTC from the database's own clock and log:
 
 ```
-07:40:04  checkpoint complete ...                      <- last time data files were written
-07:40:26  booking P3DURABLE committed                  <- only in the write-ahead log (WAL)
-07:40:28  container killed
-07:40:34  database system was not properly shut down; automatic recovery in progress
-07:40:34  redo starts at 0/5DDB9658
-07:40:34  redo done at 0/5DDE0D38
-07:40:34  database system is ready to accept connections
+08:17:36  last known up (last checkpoint)              <- last time data files were fully written
+08:22:21  booking P3DURABLE committed                  <- after the checkpoint, so only in the WAL
+08:22:22  container killed with SIGKILL
+08:22:26  database system was not properly shut down; automatic recovery in progress
+08:22:26  redo starts at 0/5DE138B8
+08:22:26  redo done at 0/5DE1EA90
+08:22:26  database system is ready to accept connections
 ```
 
-The booking was committed after the last checkpoint, so at the moment of the crash it only
-existed in the write-ahead log. PostgreSQL writes every change to the WAL and flushes it to disk
-before it reports `COMMIT`. On restart it replayed ("redo") the log and the booking came back.
+The booking was committed about five minutes after the last checkpoint, so at the moment of the
+crash it only existed in the write-ahead log. PostgreSQL writes every change to the WAL and
+flushes it to disk before it reports `COMMIT`. On restart it replayed ("redo") the log and the
+booking came back.
+
+![Durability crash test](../screenshots/p3_durability.png)
+
+**A problem I fixed:** my first version printed the kill time from my laptop's clock. Converted
+to UTC, it showed the kill one second *before* the booking was committed, which is impossible.
+The laptop clock and the clock inside Docker were about a second apart. The script now reads the
+time from the database itself just before the kill, so both times come from the same clock.
 
 ## 5. Isolation: the last suite at Christmas
 
