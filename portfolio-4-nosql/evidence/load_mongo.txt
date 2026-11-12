@@ -1,0 +1,20 @@
+collections created: guests, hotels, reservations
+hotels: loaded in 3 s
+guests: loaded in 42 s
+reservations: loaded in 112 s
+indexes:
+  hotels._id_
+  hotels.location.country_1_brand.name_1
+  guests._id_
+  guests.email_1
+  guests.bonvoy.member_number_1
+  reservations._id_
+  reservations.guest.id_1_check_in_-1
+  reservations.hotel.code_1_check_in_1
+documents:
+  hotels              198 docs, avg 701 bytes, 0 MB on disk (compressed)
+  guests           200014 docs, avg 709 bytes, 47 MB on disk (compressed)
+  reservations    1000018 docs, avg 576 bytes, 191 MB on disk (compressed)
+
+guests with a Bonvoy account: 120129
+payments embedded in bookings: 716976
