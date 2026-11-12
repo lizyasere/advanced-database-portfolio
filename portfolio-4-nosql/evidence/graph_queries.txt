@@ -1,0 +1,56 @@
++---------------------------------------------------------------+
+| hotel   | name                                | shared_guests |
++---------------------------------------------------------------+
+| "QAADV" | "Residence Inn London Waterfront"   | 90            |
+| "QAAAG" | "Courtyard Abuja Business District" | 86            |
+| "QAAGY" | "Westin Singapore Central"          | 85            |
+| "QAAGZ" | "JW Marriott Singapore North"       | 83            |
+| "QAAFH" | "Four Points New York City Centre"  | 82            |
++---------------------------------------------------------------+
+
+5 rows
+ready to start consuming query after 4 ms, results consumed after another 57 ms
++----------------------------+
+| city       | shared_guests |
++----------------------------+
+| "New York" | 12288         |
+| "London"   | 11555         |
+| "Dubai"    | 10088         |
+| "Paris"    | 7173          |
+| "Abuja"    | 5971          |
++----------------------------+
+
+5 rows
+ready to start consuming query after 3 ms, results consumed after another 548 ms
++--------------------------------------------------------+
+| hotel   | name                                 | score |
++--------------------------------------------------------+
+| "QAACQ" | "Westin Johannesburg Central"        | 4     |
+| "QAAAW" | "Courtyard Berlin Business District" | 3     |
+| "QAAEQ" | "The Ritz-Carlton Miami Airport"     | 3     |
+| "QAAAY" | "The Ritz-Carlton Berlin Airport"    | 3     |
+| "QAACR" | "JW Marriott Johannesburg North"     | 3     |
++--------------------------------------------------------+
+
+5 rows
+ready to start consuming query after 7 ms, results consumed after another 184 ms
++----------------------------------------------------------------------------------------------------------------------------------------------------------+
+| path                                                                                                                                              | hops |
++----------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ["Layla Chen (63464)", "Westin Chicago Central (QAABS)", "Sophie Silva (142924)", "Four Points by Sheraton Lagos (LOSFP)", "Omar Muller (89631)"] | 4    |
++----------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+1 row
+ready to start consuming query after 4 ms, results consumed after another 96 ms
++--------------------------------------------------------------------------------------------------------------------------------+
+| guest_id | member            | tier             | countries | some_countries                                                   |
++--------------------------------------------------------------------------------------------------------------------------------+
+| 184315   | "Sophie Musa"     | "Platinum Elite" | 11        | ["Saudi Arabia", "Nigeria", "Germany", "China", "Singapore"]     |
+| 19867    | "Ibrahim Okonkwo" | "Platinum Elite" | 10        | ["Ghana", "Italy", "China", "United States", "France"]           |
+| 80547    | "Chinedu Patel"   | "Platinum Elite" | 10        | ["Japan", "Spain", "Saudi Arabia", "Nigeria", "Canada"]          |
+| 11226    | "Aisha Kamau"     | "Platinum Elite" | 9         | ["Nigeria", "India", "Germany", "South Africa", "France"]        |
+| 14338    | "Tunde Brown"     | "Platinum Elite" | 9         | ["United Kingdom", "United States", "India", "China", "Nigeria"] |
++--------------------------------------------------------------------------------------------------------------------------------+
+
+5 rows
+ready to start consuming query after 65 ms, results consumed after another 235 ms
