@@ -1,0 +1,19 @@
+
+=== 1. Two suites free: the stay is booked in one transaction ===
+  12-24 sold 2/4, 12-25 sold 2/4, 12-26 sold 2/4 | P5 bookings: 0
+committed
+  12-24 sold 3/4, 12-25 sold 3/4, 12-26 sold 3/4 | P5 bookings: 1
+
+=== 2. The last night (26 Dec) is full: nothing is changed at all ===
+  12-24 sold 2/4, 12-25 sold 2/4, 12-26 sold 4/4 | P5 bookings: 0
+aborted: no suite free on 2027-12-26
+the 24th and 25th were taken inside the transaction, but the abort undid them:
+  12-24 sold 2/4, 12-25 sold 2/4, 12-26 sold 4/4 | P5 bookings: 0
+
+=== 3. Two guests, one suite left, both in transactions at the same time ===
+  12-24 sold 3/4, 12-25 sold 3/4, 12-26 sold 3/4 | P5 bookings: 0
+A has taken the 24th (not committed yet)
+B tries the same key: WriteConflict (TransientTransactionError)
+A commits
+B retries from the start: no suite free on 2027-12-24
+  12-24 sold 4/4, 12-25 sold 4/4, 12-26 sold 4/4 | P5 bookings: 1
