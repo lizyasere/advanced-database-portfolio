@@ -164,6 +164,10 @@ same suite at the same second. It also gives the guest a clear "sold out" messag
 error. SERIALIZABLE would be a good choice for a system where many different rules need
 protecting and writing a lock for each one is impractical.
 
+Both fixes make some transactions wait or retry. Study Session Two makes the same point: strict
+ACID guarantees can cost performance and scalability. For hotel inventory that cost is worth
+paying, because selling a room twice means a guest arriving at Christmas with nowhere to sleep.
+
 ## 6. Lost update: Bonvoy points
 
 Two things credit Ifeoma's account at the same time: 1,000 points for a stay (A) and a 2,500
