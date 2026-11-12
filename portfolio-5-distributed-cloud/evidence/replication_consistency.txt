@@ -1,0 +1,35 @@
+
+=== 1. Every node holds a full copy (full replication) ===
+primary is rs2
+  rs1   180417 bookings   200014 guests
+  rs2   180417 bookings   200014 guests
+  rs3   180417 bookings   200014 guests
+
+=== 2. How long a write takes to reach the secondaries (asynchronous replication) ===
+20 writes: fastest 7 ms, median 14 ms, slowest 173 ms until visible on rs1
+
+=== 3. Write concern: acknowledged by 1 node or by a majority ===
+  w: 1        200 inserts, 8.17 ms each
+  w: majority 200 inserts, 15.99 ms each
+
+=== 4. Stale read: replication paused on one secondary ===
+guest cancels booking 90654574 on the primary (rs2)
+  read from primary   rs2: Cancelled
+  read from secondary rs3: Cancelled
+  read from secondary rs1: Confirmed   <- stale
+
+=== 5. Both secondaries paused: the primary cannot reach a majority ===
+majority write: WriteConcernFailed after 3 s, so the app cannot tell the guest it worked
+w: 1 write: acknowledged in 19 ms, but only the primary has it
+
+=== 6. Replication resumes: every node catches up (eventual consistency) ===
+all three nodes show "Confirmed" again after 712 ms
+  rs1: Confirmed
+  rs2: Confirmed
+  rs3: Confirmed
+
+=== 7. Read your own writes (causally consistent session) ===
+session saves a special request on the primary
+  read on lagging rs1 without the session: special_request = undefined   <- stale
+  read on lagging rs1 with the session: waited 2 s and gave up (MaxTimeMSExpired) rather than return old data
+  after it catches up (with session):    special_request = airport pickup
