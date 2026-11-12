@@ -41,7 +41,7 @@ I picked Marriott because its own technology story lines up well with the topics
 |---|---|---|
 | `portfolio-1-database-design/` | ER diagram, relational schema, keys, constraints and normalisation | Complete |
 | `portfolio-2-query-optimisation/` | SQL queries, execution plans, indexing and performance results | Complete |
-| `portfolio-3-transactions-concurrency/` | Commit and rollback, isolation levels, stopping double bookings | Not started |
+| `portfolio-3-transactions-concurrency/` | Commit and rollback, isolation levels, stopping double bookings | Complete |
 | `portfolio-4-nosql/` | MongoDB model of the same Marriott data | Not started |
 | `portfolio-5-distributed-cloud/` | Replication, sharding and consistency, with a working setup | Not started |
 | `docs/` | Final documentation submitted on the LMS | Not started |
