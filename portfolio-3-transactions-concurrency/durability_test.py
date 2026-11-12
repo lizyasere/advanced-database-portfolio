@@ -36,9 +36,11 @@ log(sql("SELECT confirmation_no, booked_at FROM crs.reservation WHERE confirmati
 
 log("")
 log("Step 2: kill the database container immediately (SIGKILL, no clean shutdown)")
-killed_at = time.strftime("%H:%M:%S")
+# read the time from the database's own clock, so it can be compared with booked_at
+# (the laptop clock and the Docker clock can be a second or two apart)
+log(sql("SELECT clock_timestamp() AS database_time_just_before_kill;"))
 subprocess.run(["docker", "kill", "--signal", "KILL", "marriott_postgres"], capture_output=True)
-log(f"killed at {killed_at}")
+log("container killed")
 
 log("")
 log("Step 3: start it again")
