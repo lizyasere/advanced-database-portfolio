@@ -1,0 +1,5 @@
+Source: p5_mongos
+  reservations  copied in  591.0 s
+Now in Atlas (marriott database):
+  reservations   180417 docs   24.3 MB on disk   10.4 MB indexes
+
