@@ -14,6 +14,3 @@ node_modules/
 
 # Local environment files
 .env
-
-# Atlas connection string (contains a password)
-.env
