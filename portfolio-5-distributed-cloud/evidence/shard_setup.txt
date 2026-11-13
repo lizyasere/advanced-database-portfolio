@@ -1,0 +1,4 @@
+shards: emea (EMEA), amer (AMER_APAC)
+bookings are sharded on { region, _id } with 6 region ranges in 2 zones
+true
+loaded the upcoming bookings through mongos in 68 s

@@ -1,0 +1,33 @@
+
+=== 1. Where the bookings are stored ===
+  shard emea: 111994 bookings
+      Africa                      50108
+      Europe                      40065
+      Middle East                 21821
+  shard amer: 68423 bookings
+      Asia Pacific                17269
+      Caribbean & Latin America    5629
+      US & Canada                 45525
+
+=== 2. Which shard holds a booking at Lagos Marriott Ikeja? ===
+  booking 84217455 (Lagos Marriott Hotel Ikeja, Africa)
+  SINGLE_SHARD: shards emea, 1 docs examined, 2 ms
+
+=== 3. Query that includes the region: sent to one shard only (targeted) ===
+  arrivals at Lagos hotels on 24 Dec 2026
+  SINGLE_SHARD: shards emea, 50108 docs examined, 93 ms
+
+=== 4. Same question without the region: every shard has to be asked (scatter-gather) ===
+  SHARD_MERGE: shards amer + emea, 180417 docs examined, 104 ms
+
+=== 5. With an index on { region, hotel.city, check_in } on every shard ===
+  with the region:    SINGLE_SHARD: shards emea, 68 docs examined, 9 ms
+  without the region: SHARD_MERGE: shards amer + emea, 180417 docs examined, 102 ms
+
+=== 6. Report across all regions: each shard does its part, mongos merges ===
+  Africa                      50108 bookings  150000 nights
+  US & Canada                 45525 bookings  136252 nights
+  Europe                      40065 bookings  120347 nights
+  Middle East                 21821 bookings   65711 nights
+  Asia Pacific                17269 bookings   51912 nights
+  Caribbean & Latin America    5629 bookings   16837 nights
