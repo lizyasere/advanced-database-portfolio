@@ -36,6 +36,7 @@ if not source:
     raise SystemExit("Start a P5 profile first (replica or sharded).")
 wanted = sys.argv[1:] or ["hotels", "guests", "availability", "reservations"]
 lines = [f"Source: {source}"]
+print(lines[0], flush=True)
 
 for name in wanted:
     dump = ["docker", "exec", source, "mongodump", "--quiet", "--archive", "--uri", SOURCES[source],
@@ -44,19 +45,34 @@ for name in wanted:
         dump += ["--query", UPCOMING]
     start = time.perf_counter()
     export = subprocess.Popen(dump, stdout=subprocess.PIPE)
-    restore = atlas('mongorestore --quiet --archive --drop --uri "$MONGODB_URI"', stdin=export.stdout)
+    restore = atlas('mongorestore --archive --drop --uri "$MONGODB_URI"', stdin=export.stdout)
     export.wait()
-    if restore.returncode != 0:
-        raise SystemExit(restore.stderr.replace("\n", " ")[-400:])
+    # mongorestore can exit 0 even when some documents were not written, so read its summary too
+    summary = restore.stderr.strip().splitlines()[-1] if restore.stderr.strip() else ""
+    if restore.returncode != 0 or " 0 document(s) failed" not in summary:
+        raise SystemExit(f"{name}: copy failed: {restore.stderr.strip()[-600:]}")
     lines.append(f"  {name:<13} copied in {time.perf_counter() - start:6.1f} s")
+    print(lines[-1], flush=True)
+
+if "reservations" in wanted:
+    # The sharded copy only has the shard key index, so the Portfolio 4 booking indexes are added here.
+    idx = atlas('mongosh "$MONGODB_URI" --quiet --eval \'const r = db.getSiblingDB("marriott").reservations; '
+                'r.createIndex({ "guest.id": 1, check_in: -1 }); r.createIndex({ "hotel.code": 1, check_in: 1 }); '
+                'print(r.getIndexes().length)\'')
+    if idx.returncode != 0:
+        raise SystemExit("index build failed: " + idx.stderr.strip()[-400:])
+    lines.append(f"  reservations  booking indexes created ({idx.stdout.strip()} indexes now)")
+    print(lines[-1], flush=True)
 
 check = atlas('mongosh "$MONGODB_URI" --quiet --eval \'db = db.getSiblingDB("marriott"); '
               'db.getCollectionNames().sort().forEach(c => { const s = db.runCommand({collStats: c}); '
               'print("  " + c.padEnd(13) + String(s.count).padStart(8) + " docs " + '
               '(s.storageSize / 1048576).toFixed(1).padStart(6) + " MB on disk " + '
               '(s.totalIndexSize / 1048576).toFixed(1).padStart(6) + " MB indexes") })\'')
+if check.returncode != 0:
+    raise SystemExit("count check failed: " + check.stderr.strip()[-400:])
 lines.append("Now in Atlas (marriott database):")
-lines.append(check.stdout.rstrip() or check.stderr.strip())
-print("\n".join(lines))
+lines.append(check.stdout.rstrip())
+print("\n".join(lines[-2:]))
 with open(HERE / "evidence" / "copy_to_atlas.txt", "a", encoding="utf-8") as f:
     f.write("\n".join(lines) + "\n\n")

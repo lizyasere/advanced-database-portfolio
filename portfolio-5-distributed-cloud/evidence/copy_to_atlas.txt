@@ -3,3 +3,20 @@ Source: p5_mongos
 Now in Atlas (marriott database):
   reservations   180417 docs   24.3 MB on disk   10.4 MB indexes
 
+Source: p5_rs1
+  hotels        copied in    5.4 s
+  availability  copied in    3.5 s
+Now in Atlas (marriott database):
+  availability       36 docs    0.0 MB on disk    0.0 MB indexes
+  guests         184902 docs   47.9 MB on disk    5.6 MB indexes
+  hotels            198 docs    0.0 MB on disk    0.0 MB indexes
+  reservations   180417 docs   26.6 MB on disk   10.5 MB indexes
+
+Source: p5_rs1
+  guests        copied in  814.9 s
+Now in Atlas (marriott database):
+  availability       36 docs    0.0 MB on disk    0.0 MB indexes
+  guests         200014 docs   50.0 MB on disk   12.5 MB indexes
+  hotels            198 docs    0.1 MB on disk    0.1 MB indexes
+  reservations   180417 docs   26.9 MB on disk   10.5 MB indexes
+
