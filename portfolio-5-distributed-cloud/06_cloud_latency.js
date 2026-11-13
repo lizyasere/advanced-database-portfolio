@@ -41,7 +41,8 @@ timeIt("arrivals at Lagos Marriott Ikeja on one day", () => mdb.reservations.fin
 timeIt("insert booking, w:1", i => mdb.reservations.insertOne(booking("P5LAT1-" + i), { writeConcern: { w: 1 } }));
 timeIt("insert booking, w:majority", i => mdb.reservations.insertOne(booking("P5LAT2-" + i), { writeConcern: { w: "majority" } }));
 
-// 3-night stay as one transaction (as in 03_transactions.js), undone after each run
+// 3-night stay as one transaction (as in 03_transactions.js), undone after each run.
+// The timing includes the undo, so it is 6 calls to the server: 3 nights, insert, commit, undo.
 const before = mdb.availability.find({ _id: { $in: KEYS } }).toArray();
 timeIt("3-night booking in one transaction", i => {
   const session = db.getMongo().startSession();
