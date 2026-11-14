@@ -44,7 +44,7 @@ I picked Marriott because its own technology story lines up well with the topics
 | `portfolio-3-transactions-concurrency/` | Commit and rollback, isolation levels, stopping double bookings | Complete |
 | `portfolio-4-nosql/` | Document, key-value and graph models of the same Marriott data (MongoDB and Neo4j) | Complete |
 | `portfolio-5-distributed-cloud/` | Replication, failover, sharding by region, distributed transactions and a MongoDB Atlas cloud deployment | Complete |
-| `docs/` | Final documentation submitted on the LMS | Not started |
+| `docs/` | Final documentation submitted on the LMS (PDF) and detailed reflection notes | Complete |
 | `screenshots/` | Screenshots used as evidence across all portfolios | |
 
 ## Link to the course study sessions

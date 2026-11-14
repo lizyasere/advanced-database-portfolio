@@ -15,3 +15,6 @@ node_modules/
 # Local environment files
 .env
 *.env
+
+# Word copy of the LMS document stays local
+docs/*.docx
