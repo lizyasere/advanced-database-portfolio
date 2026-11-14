@@ -172,9 +172,14 @@ dropped, not refused, and without a timeout the app would wait forever.
 
 Study Session Two explains the CAP theorem: during a network partition a distributed database has
 to choose between consistency (every read sees the latest write) and availability (every request
-gets an answer). The partition test is that choice happening. MongoDB chose consistency. The
-minority side (rs2) refused writes, and for about 17 seconds nobody could book, rather than
-letting two primaries accept bookings for the same last suite and disagree later.
+gets an answer). The partition test shows how a replica set makes that choice. A primary needs
+to reach a majority of the nodes, so rs2, cut off on its own, stepped down and refused writes,
+while rs1 and rs3 still formed a majority and elected a new primary. With `w: "majority"` writes,
+the replica set kept the data consistent by giving up write availability on the minority side.
+For about 17 seconds nobody could book, rather than two primaries accepting bookings for the same
+last suite and disagreeing later. It is not a complete loss of availability: the majority side
+recovered, and an app that asks for secondary reads could still read from rs2, but those reads
+could be stale, as section 3 showed.
 
 For room inventory that is the right choice. Two data centres both selling the last suite would
 mean a guest arriving to no room, which is the overbooking problem from Portfolio 3 on a global

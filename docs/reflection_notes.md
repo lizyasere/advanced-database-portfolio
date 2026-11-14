@@ -245,8 +245,9 @@ recreated the indexes from Portfolio 4, the query examined only the matching boo
   setting where an acknowledged booking survives the loss of the primary. That is a price I
   would pay for bookings and payments.
 * The partition test made the CAP theorem real for me. The cut-off primary stepped down by itself
-  and nobody could book for about 17 seconds. MongoDB chose consistency over availability, which
-  is the right choice for the last room in a hotel.
+  and nobody could book for about 17 seconds, while the other two nodes elected a new primary.
+  The replica set kept the data consistent by giving up write availability on the side that had
+  lost the majority, which is the right choice for the last room in a hotel.
 * MongoDB transactions are optimistic. The second guest got a `WriteConflict` straight away
   instead of waiting for a lock like in PostgreSQL. Both approaches sold the last suite exactly
   once, but the app has to be ready to retry.
