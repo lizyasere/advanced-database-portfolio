@@ -43,7 +43,7 @@ I picked Marriott because its own technology story lines up well with the topics
 | `portfolio-2-query-optimisation/` | SQL queries, execution plans, indexing and performance results | Complete |
 | `portfolio-3-transactions-concurrency/` | Commit and rollback, isolation levels, stopping double bookings | Complete |
 | `portfolio-4-nosql/` | Document, key-value and graph models of the same Marriott data (MongoDB and Neo4j) | Complete |
-| `portfolio-5-distributed-cloud/` | Replication, sharding and consistency, with a working setup | Not started |
+| `portfolio-5-distributed-cloud/` | Replication, failover, sharding by region, distributed transactions and a MongoDB Atlas cloud deployment | Complete |
 | `docs/` | Final documentation submitted on the LMS | Not started |
 | `screenshots/` | Screenshots used as evidence across all portfolios | |
 
@@ -52,8 +52,8 @@ I picked Marriott because its own technology story lines up well with the topics
 | Study session | Main topics | Where I applied it |
 |---|---|---|
 | One: Review of Traditional Relational Databases and Advanced Concepts | Design stages, characteristics of a good database, normalisation (1NF to BCNF) | Portfolio 1: followed the design stages from requirements to testing, normalised a flat booking sheet to BCNF, and kept two columns denormalised on purpose |
-| Two: Distributed Database System | Fragmentation, replication, consistency, CAP theorem, ACID vs BASE | Portfolio 3: tested all four ACID properties, including a crash test for durability. Portfolio 4: a multi-night booking in a key-value store that gives nights back instead of using a transaction (BASE). Portfolio 5: replication, sharding and the CAP trade-off for hotels in many countries |
-| Three: Big Data and Cloud Database Systems | Cloud databases and their uses, data warehouses, security | Portfolio 5: running the Marriott data on a cloud database service |
+| Two: Distributed Database System | Fragmentation, replication, consistency, CAP theorem, ACID vs BASE | Portfolio 3: tested all four ACID properties, including a crash test for durability. Portfolio 4: a multi-night booking in a key-value store that gives nights back instead of using a transaction (BASE). Portfolio 5: a three-node replica set (replication lag, write concerns, stale reads, failover and a network partition), bookings sharded by region as horizontal fragmentation, and multi-document transactions |
+| Three: Big Data and Cloud Database Systems | Cloud databases and their uses, data warehouses, security | Portfolio 5: the Marriott booking data loaded into MongoDB Atlas, with local and cloud response times compared and the cloud features (scaling, high availability, managed backups) checked against the free tier |
 | Four: Query Optimisation in Database | Cost-based optimisation, execution plans, cost estimation, indexing and file organisation | Portfolio 2: read execution plans, compared estimated and actual rows, added partial, expression and covering indexes, and measured their cost |
 | Five: Emerging Trends in Database Systems | Graph databases, serverless and edge databases | Portfolio 4: a graph of guests, hotels, cities and countries in Neo4j, queried in Cypher for recommendations and link analysis, and compared with the same questions in SQL |
 | Six: Introduction to Data Security and Data Privacy | Privacy challenges, privacy by design | Portfolio 1: no passport numbers or full card numbers stored, based on the Starwood breach |
