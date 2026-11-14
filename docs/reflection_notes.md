@@ -260,3 +260,42 @@ recreated the indexes from Portfolio 4, the query examined only the matching boo
   reservation system would need a paid cluster.
 * I checked the Amadeus and Hotel Technology News sources before writing about Marriott's move to
   the cloud, and only used what they actually say, because neither gives full rollout dates.
+
+## Overall
+
+**The biggest lessons.** The same problem followed me through every portfolio: two people trying
+to book the last room at the same time. In Portfolio 2 my generated data had 10 bookings for 8
+rooms. In Portfolio 3 it was write skew in PostgreSQL, in Portfolio 4 a read-then-write race in a
+key-value store, and in Portfolio 5 a write conflict inside a transaction and a primary cut off
+from the network. Each database and each model needed a different fix, but the question was
+always the same: where is the single point that decides whether the room is still free? Seeing
+one business problem in five different settings taught me more than five separate exercises
+would have.
+
+The second lesson is to measure before believing anything, including my own expectations. I
+expected REPEATABLE READ to stop overbooking, an index to speed up the top members query,
+MongoDB to be faster than PostgreSQL, and a targeted shard query to beat a scatter-gather one.
+All four were wrong, or only right under certain conditions. Each time, the execution plan or
+the measured numbers showed me why. I now trust a median of several runs more than one fast
+result, and I read the plan before changing anything.
+
+The third lesson is that a lot of the real work was outside the database. Shell escaping, output
+order in PowerShell, two clocks that disagreed by a second, a tool that reported success after
+losing 15,000 documents, and a laptop running out of memory all cost me more time than the SQL
+did. Checking the results, not just whether a command finished, became a habit.
+
+**What I would do differently.** I would start the portfolios earlier in the semester and spread
+the work out. Most of this work was done in the final week before the deadline, which meant long
+days and less time to go back and improve earlier parts. Spreading it out would also have given
+a more natural commit history. I learned to commit in small steps during the project, after
+putting a whole set of Portfolio 3 scenarios into one large commit, and I would do that from day
+one next time.
+
+I would also think about indexes and test with large data from the start of the design. The
+missing index on `points_transaction.reservation_id` came from Portfolio 1 and was only found in
+Portfolio 4. With a million bookings in Portfolio 1, I would have caught it straight away.
+
+**Managing the workload.** This course ran alongside my other courses and work, so I had to keep
+each portfolio focused on the questions that mattered most for Marriott instead of trying to
+cover every topic. Using one case study and one dataset all the way through helped a lot,
+because each portfolio built on the last one instead of starting from nothing.
