@@ -198,3 +198,65 @@ than one person.
 * A name is not an identifier, whether the data is in a table or a graph.
 * I checked the article about Marriott and Couchbase before quoting it. It did not say some of
   the things I had assumed, so I only used what it actually reported.
+
+## Portfolio 5: Distributed and cloud databases
+
+**Design choices.** I used MongoDB for this portfolio because I had already modelled the
+bookings as documents in Portfolio 4, and MongoDB lets me build a replica set, a sharded cluster
+and a cloud deployment with the same data and the same queries. I copied only the upcoming
+bookings (about 180,000) instead of all million, because that is what a live reservation system
+needs to serve, and it kept the tests small enough for my laptop.
+
+I wanted to see the failures, not just read about them. So instead of only describing failover,
+I ran a small booking app in its own container that saves a booking every 200 ms, and then killed
+or disconnected the primary while it was running. For sharding I split the bookings by region,
+because Study Session Two uses region as its example of horizontal fragmentation and it matches
+how Marriott groups its hotels.
+
+For the cloud part I chose MongoDB Atlas on the free tier, in the Paris region, so I could load
+the same data and run the same queries against a real managed service.
+
+**Challenges.** Memory was the biggest practical problem. With the Portfolio 1 to 4 containers
+still running, plus three replica set members, Docker froze when my laptop had only 0.3 GB of
+memory left, and I had to restart Docker Desktop. After that I stopped the older containers,
+capped each MongoDB cache, and only ran one setup (the replica set or the sharded cluster) at a
+time.
+
+The first failover run took about 33 seconds instead of 11, because the first election attempt
+failed and the nodes had to wait for another timeout. It reminded me that one run is not a
+result. The partition test also showed something the crash test did not: after the network was
+cut, my booking app hung for almost 7 seconds on a connection that never answered, because
+packets to a disconnected server are dropped rather than refused. Adding a socket timeout to
+the app fixed it.
+
+Copying data to Atlas went wrong in a way I nearly missed. The guest copy lost its connection at
+184,902 of 200,014 documents when my IP address changed, but the restore tool still finished
+with a success code. I only caught it by counting the documents. I changed my script to check
+the tool's own "document(s) failed" line instead of trusting the exit code. The first latency
+test on Atlas was also misleading: the arrivals query took 228 ms and examined every booking,
+because the copy from the sharded cluster had brought over only the shard key index. Once I
+recreated the indexes from Portfolio 4, the query examined only the matching bookings.
+
+**What I learned.**
+* Replication is not the same as having the same data everywhere at the same time. With
+  replication paused on one node, a cancelled booking still showed as confirmed there. Which
+  node you read from, and which write concern you use, decide what a guest sees.
+* `w: "majority"` roughly doubled the time per write (from about 8 to 16 ms), but it is the only
+  setting where an acknowledged booking survives the loss of the primary. That is a price I
+  would pay for bookings and payments.
+* The partition test made the CAP theorem real for me. The cut-off primary stepped down by itself
+  and nobody could book for about 17 seconds. MongoDB chose consistency over availability, which
+  is the right choice for the last room in a hotel.
+* MongoDB transactions are optimistic. The second guest got a `WriteConflict` straight away
+  instead of waiting for a lock like in PostgreSQL. Both approaches sold the last suite exactly
+  once, but the app has to be ready to retry.
+* Sending a query to one shard did not make it faster on its own. Without an index, the targeted
+  query was sometimes slower than asking both shards. The shard key only pays off together with
+  a good index, and the app must always include the region.
+* In the cloud, almost all of the time was the network. Each call to Atlas took about 130 ms
+  while the server itself took close to 0 ms, so a 3-night booking with six calls took almost a
+  second. Fewer round trips matter more than faster queries once the database is far away.
+* The free tier is for learning only. Backups were inactive and it cannot scale, so a real
+  reservation system would need a paid cluster.
+* I checked the Amadeus and Hotel Technology News sources before writing about Marriott's move to
+  the cloud, and only used what they actually say, because neither gives full rollout dates.
